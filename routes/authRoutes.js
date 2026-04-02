@@ -14,6 +14,7 @@ router.post("/resendtfid", resendTfId);
 
 
 router.post("/forgot-password", forgotPassword);
+
 router.put("/reset-password/:token", resetPassword);
 
 export default router;
