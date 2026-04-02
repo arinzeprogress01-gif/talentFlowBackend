@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
-    
+
     {
         fullname: {
             type: String,
@@ -52,8 +52,9 @@ const userSchema = new mongoose.Schema(
             default: false,
         },
 
-        resetPassWordToken : String.
-        resetPassWordExpire: Date,
+        resetPassWordToken : String,
+        
+        resetPassWordExpire: Date
     },
     {
         timestamps: true,
