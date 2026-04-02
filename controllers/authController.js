@@ -5,8 +5,17 @@ import jwt from "jsonwebtoken";
 import sendEmail from "../utils/email.js";
 
 export const registerUser = async (req, res) => {
+        
     try {
-        const { name, email, password } = req.body;
+        const { fullname, email, password, confirmPassword } = req.body;
+
+        if (!fullname || !email || !password) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        if (password !== confirmPassword) {
+            return res.status(400).json({ message: "Passwords do not match" });
+        }
 
         // Check if user exists
         const userExists = await User.findOne({ email });
@@ -20,12 +29,11 @@ export const registerUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // Generate TF ID
-        // Generate TF ID
         const tfId = generateTfId();
 
         // Create user
         const user = await User.create({
-            name,
+            fullname,
             email,
             password: hashedPassword,
             tfId,
@@ -34,13 +42,14 @@ export const registerUser = async (req, res) => {
         // 🔥 SEND EMAIL
         const message = `
             <h2>Welcome to TalentFlow 🚀</h2>
-            <p>Hello ${name},</p>
+            <p>Hello ${fullname},</p>
             <p>Your account has been created successfully.</p>
             <p><strong>Your TalentFlow ID:</strong> ${tfId}</p>
             <p>Keep this ID safe for verification and tracking.</p>
         `;
 
-        await sendEmail(email, "Welcome to TalentFlow", message);
+        sendEmail(email, "Welcome to TalentFlow", message)
+            .catch(err => console.error("Email failed:", err.message));
         res.status(201).json({
             message: "User registered successfully",
             tfId: user.tfId,
@@ -81,12 +90,37 @@ export const loginUser = async (req, res) => {
             message: "Login successful",
             token,
             user: {
-                name: user.name,
+                fullname: user.fullname,
                 email: user.email,
                 tfId: user.tfId,
                 role: user.role,
             },
         });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const resendTfId = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const message = `
+            <h2>Your TalentFlow ID</h2>
+            <p>Hello ${user.name},</p>
+            <p>Your TF ID is: <strong>${user.tfId}</strong></p>
+        `;
+
+        await sendEmail(email, "Your TalentFlow ID", message);
+
+        res.json({ message: "TF ID sent to email" });
 
     } catch (error) {
         res.status(500).json({ message: error.message });

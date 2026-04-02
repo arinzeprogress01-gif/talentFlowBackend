@@ -1,4 +1,4 @@
-const generateTfId = () => {
+export const generateTfId = () => {
     const year = new Date().getFullYear();
 
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
