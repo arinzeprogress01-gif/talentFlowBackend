@@ -5,19 +5,22 @@ import jwt from "jsonwebtoken";
 import sendEmail from "../utils/email.js";
 import generateResetToken from "../utils/generateResetToken.js";
 import crypto from "crypto"
+
 export const registerUser = async (req, res) => {
         
     try {
         const { fullname, email, password, confirmPassword } = req.body;
 
-        if (!fullname || !email || !password) {
+        if (!fullname || !email || !password || !confirmPassword) {
             return res.status(400).json({ message: "All fields are required" });
         }
-
+        
         if (password !== confirmPassword) {
             return res.status(400).json({ message: "Passwords do not match" });
         }
-
+        if (!confirmPassword) {
+            return res.status(400).json({ message: "Confirm password is required" });
+        }
         // Check if user exists
         const userExists = await User.findOne({ email });
 
@@ -141,18 +144,22 @@ export const forgotPassword = async (req, res) => {
         const { resetToken, hashedToken } = generateResetToken();
 
         user.resetPasswordToken = hashedToken;
-        user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 mins
+        user.resetPasswordExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
         await user.save();
 
-        const resetUrl = `http://localhost:5000/reset-password/${resetToken}`;
+        const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
 
         const message = `
-            <h2>Password Reset Request</h2>
+            <h2>Reset Your Password</h2>
             <p>Hello ${user.fullName},</p>
-            <p>Click the link below to reset your password:</p>
-            <a href="${resetUrl}">${resetUrl}</a>
-            <p>This link expires in 10 minutes.</p>
+            <p>We received a request to reset your password.</p>
+            <p>Click the button below to continue:</p>
+            <a href="${resetUrl}" style="padding:10px 20px;background:#4f46e5;color:#fff;border-radius:5px;text-decoration:none;">
+                Reset Password
+            </a>
+            <p>This link will expire in 24 hours.</p>
+            <p>If you didn’t request this, ignore this email.</p>
         `;
 
         await sendEmail(email, "Password Reset", message);
@@ -197,4 +204,29 @@ export const resetPassword = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+};
+
+export const resendResetEmail = async (req, res) => {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    const { resetToken, hashedToken } = generateResetToken();
+
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpire = Date.now() + 24 * 60 * 60 * 1000;
+
+    await user.save();
+
+    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+
+    const message = `<p>Reset again:</p><a href="${resetUrl}">${resetUrl}</a>`;
+
+    await sendEmail(email, "Reset Password", message);
+
+    res.json({ message: "Reset email resent" });
 };

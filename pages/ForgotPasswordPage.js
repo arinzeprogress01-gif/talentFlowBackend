@@ -19,9 +19,29 @@ const ForgotPasswordPage = () => {
         }, 2500);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        navigate('/check-email', { state: { email } });
+
+        try {
+            const res = await fetch("http://localhost:8080/api/auth/forgot-password", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message);
+            }
+
+            navigate('/check-email', { state: { email } });
+
+        } catch (error) {
+            alert(error.message);
+        }
     };
 
     return (
