@@ -9,7 +9,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 
 app.get("/", (_req, res) => {
-    res.send("TalentFlow APU running...")
+    res.send("TalentFlow API running...")
 });
 
 export default app;
