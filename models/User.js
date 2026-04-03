@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema(
 
         role: {
             type: String,
-            enum: ["student", "tutor"],
+            enum: ["learner", "tutor"],
             default: null,
         },
 
@@ -52,6 +52,19 @@ const userSchema = new mongoose.Schema(
             default: false,
         },
 
+        learnerRef: String,
+
+        tutorRef: String,
+
+        selectedCourse: {
+            type: String,
+            default: null
+        },
+
+        isRoleVerified: {
+            type: Boolean,
+            default: false
+        },
         verificationToken: String,
 
         verificationExpire: Date,

@@ -3,6 +3,8 @@ import { registerUser, loginUser, resendTfId, verifyEmail, resendVerification} f
 
 import { forgotPassword, resetPassword, } from "../controllers/authController.js";
 
+import { selectRole, verifyRole } from "../controllers/authController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -21,5 +23,9 @@ router.post("/forgot-password", forgotPassword);
 
 router.put("/reset-password/:token", resetPassword);
 
+
+router.put("/select-role", protect, selectRole);
+
+router.put("/verify-role", protect, verifyRole);
 
 export default router;

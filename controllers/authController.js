@@ -4,6 +4,7 @@ import generateTfId from "../utils/generateTfId.js";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/email.js";
 import crypto from "crypto"
+import generateRoleId from "../utils/generateRoleId.js";
 
 export const registerUser = async (req, res) => {
         
@@ -273,7 +274,7 @@ export const forgotPassword = async (req, res) => {
             <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
                 
                 <!-- Header -->
-                <div style="background: linear-gradient(135deg, #076e21, #0b8b3c); padding: 25px; text-align: center; color: white;">
+                <div style="background: linear-gradient(135deg, #065f46, #047857); padding: 25px; text-align: center; color: white;">
                     <h1 style="margin: 0; font-size: 24px;">Reset Your Password</h1>
                 </div>
 
@@ -468,6 +469,153 @@ export const resendVerification = async (req, res) => {
         await sendEmail(email, "Verify Your Email", message);
 
         res.json({ message: "Verification email resent" });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+export const selectRole = async (req, res) => {
+    try {
+        const { role } = req.body;
+
+        if (!["learner", "tutor"].includes(role)) {
+            return res.status(400).json({ message: "Invalid role" });
+        }
+
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (user.role !== null) {
+            return res.status(400).json({ message: "Role already selected" });
+        }
+
+        user.role = role;
+
+        let refId;
+
+        if (role === "learner") {
+            refId = generateRoleId("LRN");
+            user.learnerRef = refId;
+        } else {
+            refId = generateRoleId("TRN");
+            user.tutorRef = refId;
+        }
+
+        await user.save();
+
+        // 🔥 EMAIL (APPROVAL EMAIL)
+        const message = `
+        <div style="font-family: Arial; background:#f4f6fb; padding:20px;">
+            <div style="max-width:600px;margin:auto;background:#fff;border-radius:10px;overflow:hidden;">
+                
+                <div style="background: linear-gradient(135deg, #065f46, #047857);padding:20px;text-align:center;color:white;">
+                    <h2>${role === "learner" ? "Learner Enrollment Successful 🎓" : "Tutor Application Approved 🏆"}</h2>
+                </div>
+
+                <div style="padding:25px;">
+                    <p>Hello ${user.fullname},</p>
+
+                    <p>
+                        Your ${role === "learner" ? "learning" : "teaching"} journey with TalentFlow is now active.
+                    </p>
+
+                    <div style="background:#ecfdf5;padding:15px;border-left:5px solid #067a236c;border-radius:6px;margin:20px 0;">
+                        <strong>Your Reference Number:</strong><br/>
+                        <span style="font-size:18px;color:#10e662;">${refId}</span>
+                    </div>
+
+                    <p>
+                        You will need this reference number to complete your verification and access your dashboard.
+                    </p>
+
+                    <p>
+                        Continue your journey by completing your verification.
+                    </p>
+                </div>
+            </div>
+        </div>
+        `;
+
+        await sendEmail(user.email, "TalentFlow Role Confirmation", message);
+
+        res.json({
+            message: "Role selected. Check your email.",
+            role,
+            refId
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const verifyRole = async (req, res) => {
+    try {
+        const { fullname, referenceNumber, course } = req.body;
+
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Match reference
+        const validRef =
+            user.role === "learner"
+                ? user.learnerRef === referenceNumber
+                : user.tutorRef === referenceNumber;
+
+        if (!validRef) {
+            return res.status(400).json({ message: "Invalid reference number" });
+        }
+
+        // Match name
+        if (user.fullname !== fullname) {
+            return res.status(400).json({ message: "Name does not match records" });
+        }
+
+        user.selectedCourse = course;
+        user.isRoleVerified = true;
+
+        await user.save();
+
+        // 🔥 FINAL EMAIL
+        const message = `
+        <div style="font-family: Arial; background:#f4f6fb; padding:20px;">
+            <div style="max-width:600px;margin:auto;background:#fff;border-radius:10px;">
+                
+                <div style="background: linear-gradient(135deg, #065f46, #047857);padding:20px;text-align:center;color:white;">
+                    <h2>Welcome to TalentFlow 🚀</h2>
+                </div>
+
+                <div style="padding:25px;">
+                    <p>Hello ${user.fullname},</p>
+
+                    <p>
+                        Your verification is complete. You are now officially enrolled in:
+                    </p>
+
+                    <h3 style="color:#10e662;">${course}</h3>
+
+                    <p>
+                        Your journey starts now. Build, learn, grow, and make impact.
+                    </p>
+                </div>
+            </div>
+        </div>
+        `;
+
+        await sendEmail(user.email, "Welcome to TalentFlow", message);
+
+        res.json({
+            message: "Verification successful",
+            course
+        });
 
     } catch (error) {
         res.status(500).json({ message: error.message });

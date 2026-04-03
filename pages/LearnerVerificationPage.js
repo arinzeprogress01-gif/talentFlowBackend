@@ -86,7 +86,7 @@ const LearnerVerificationPage = () => {
                                 id="referenceNumber"
                                 type="text"
                                 label="Learner Reference Number"
-                                placeholder="LRN-2024-XXXXX"
+                                placeholder="LRN-2026-XXXXX"
                                 icon={Hash}
                                 required
                                 value={formData.referenceNumber}
@@ -136,7 +136,7 @@ const LearnerVerificationPage = () => {
                                 </li>
                                 <li className="flex gap-2 items-center">
                                     <span className="bg-primary flex-shrink-0 h-1.5 rounded-full w-1.5"></span>
-                                    Format: LRN-2024-XXXXX (Learner Reference Number)
+                                    Format: LRN-2026-XXXXX (Learner Reference Number)
                                 </li>
                             </ul>
                         </div>
