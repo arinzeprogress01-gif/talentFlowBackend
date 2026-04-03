@@ -35,21 +35,103 @@ export const registerUser = async (req, res) => {
         // Generate TF ID
         const tfId = generateTfId();
 
+        const verificationToken = crypto.randomBytes(20).toString("hex");
+
+        const hashedToken = crypto
+            .createHash("sha256")
+            .update(verificationToken)
+            .digest("hex");
+
         // Create user
         const user = await User.create({
             fullname,
             email,
             password: hashedPassword,
             tfId,
+            verificationToken: hashedToken,
+            verificationExpire: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
         });
 
         // 🔥 SEND EMAIL
+        const verifyUrl = `http://localhost:8080/api/auth/verify-email/${verificationToken}`;
+
         const message = `
-            <h2>Welcome to TalentFlow 🚀</h2>
-            <p>Hello ${fullname},</p>
-            <p>Your account has been created successfully.</p>
-            <p><strong>Your TalentFlow ID:</strong> ${tfId}</p>
-            <p>Keep this ID safe for verification and tracking.</p>
+        <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+                
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, #065f46, #047857); padding: 25px; text-align: center; color: white;">
+                    <h1 style="margin: 0; font-size: 24px;">Welcome to TalentFlow 🚀</h1>
+                    <p style="margin-top: 8px; font-size: 14px; opacity: 0.9;">
+                        Powered by TrueMinds Ltd
+                    </p>
+                </div>
+
+                <!-- Body -->
+                <div style="padding: 30px;">
+                    <p style="font-size: 16px; color: #333;">Hello <strong>${fullname}</strong>,</p>
+
+                    <p style="font-size: 15px; color: #555; line-height: 1.6;">
+                        We’re excited to have you join a growing community of individuals committed to learning, building, and becoming more.
+                        Your journey toward mastering new skills and creating real impact starts here.
+                    </p>
+
+                    <!-- TF ID Box -->
+                    <div style="margin: 25px 0; padding: 20px; background: #ecfdf5; border-left: 5px solid #047857; border-radius: 8px;">
+                        <p style="margin: 0; font-size: 14px; color: #555;">Your TalentFlow ID</p>
+                        <h2 style="margin: 5px 0 0; color: #065f46; letter-spacing: 1px;">
+                            ${tfId}
+                        </h2>
+                    </div>
+
+                    <p style="font-size: 15px; color: #555; line-height: 1.6;">
+                        Keep this ID safe — it will be important as you progress, verify your profile, and access key features on your dashboard.
+                    </p>
+
+                    <p style="font-size: 15px; color: #555; line-height: 1.6;">
+                        Stay consistent, stay curious, and keep building. TalentFlow is here to support your growth every step of the way.
+                    </p>
+
+                    <!-- ✅ EMAIL VERIFICATION -->
+                    <div style="text-align: center; margin-top: 30px;">
+                        <p style="font-size: 15px; color: #555;">
+                            Please verify your email to activate your account.
+                        </p>
+
+                        <a href="${verifyUrl}" style="
+                            display: inline-block;
+                            margin-top: 10px;
+                            padding: 12px 25px;
+                            background: #047857;
+                            color: white;
+                            border-radius: 6px;
+                            text-decoration: none;
+                            font-size: 14px;
+                            font-weight: bold;
+                        ">
+                            VERIFY MY EMAIL
+                        </a>
+
+                        <p style="margin-top: 10px; font-size: 12px; color: #888;">
+                            This link will expire in 24 hours.
+                        </p>
+                    </div>
+
+                    <!-- CTA -->
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="#" style="background: #065f46; color: white; padding: 12px 25px; border-radius: 6px; text-decoration: none; font-size: 14px; display: inline-block;">
+                            GET READY TO GROW
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="background: #f9fafb; padding: 15px; text-align: center; font-size: 12px; color: #888;">
+                    <p style="margin: 0;">© ${new Date().getFullYear()} TrueMinds Ltd - TalentFlow</p>
+                    <p style="margin: 5px 0 0;">Empowering growth through learning and collaboration</p>
+                </div>
+            </div>
+        </div>
         `;
 
         sendEmail(email, "Welcome to TalentFlow", message)
@@ -74,6 +156,12 @@ export const loginUser = async (req, res) => {
 
         if (!user) {
             return res.status(400).json({ message: "Invalid credentials" });
+        }
+
+        if (!user.isVerified) {
+            return res.status(401).json({
+                message: "Please verify your email before logging in"
+            });
         }
 
         // Compare password
@@ -117,9 +205,31 @@ export const resendTfId = async (req, res) => {
         }
 
         const message = `
-            <h2>Your TalentFlow ID</h2>
-            <p>Hello ${user.name},</p>
-            <p>Your TF ID is: <strong>${user.tfId}</strong></p>
+        <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
+        <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+
+            <div style="background: linear-gradient(135deg, #065f46, #047857); padding: 20px; text-align: center; color: white;">
+            <h2 style="margin:0;">Your TalentFlow ID</h2>
+            </div>
+
+            <div style="padding: 25px;">
+            <p style="font-size:15px;">Hello <strong>${user.fullname}</strong>,</p>
+
+            <p style="color:#555;">Here is your TalentFlow identification number:</p>
+
+            <div style="margin:20px 0; padding:15px; background:#ecfdf5; border-left:4px solid #047857; border-radius:6px;">
+                <h2 style="margin:0; color:#065f46; letter-spacing:1px;">${user.tfId}</h2>
+            </div>
+
+            <p style="color:#555;">Keep this safe — it will be used across your TalentFlow journey.</p>
+            </div>
+
+            <div style="text-align:center; font-size:12px; color:#888; padding:15px;">
+            © ${new Date().getFullYear()} TrueMinds Ltd
+            </div>
+
+        </div>
+        </div>
         `;
 
         await sendEmail(email, "Your TalentFlow ID", message);
@@ -143,8 +253,8 @@ export const forgotPassword = async (req, res) => {
 
         const { resetToken, hashedToken } = generateResetToken();
 
-        user.resetPasswordToken = hashedToken;
-        user.resetPasswordExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+        user.resetPassWordToken = hashedToken;
+        user.resetPassWordExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
         await user.save();
 
@@ -152,7 +262,7 @@ export const forgotPassword = async (req, res) => {
 
         const message = `
             <h2>Reset Your Password</h2>
-            <p>Hello ${user.fullName},</p>
+            <p>Hello ${user.fullname},</p>
             <p>We received a request to reset your password.</p>
             <p>Click the button below to continue:</p>
             <a href="${resetUrl}" style="padding:10px 20px;background:#4f46e5;color:#fff;border-radius:5px;text-decoration:none;">
@@ -194,8 +304,8 @@ export const resetPassword = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
 
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
+        user.resetPassWordToken = undefined;
+        user.resetPassWordExpire = undefined;
 
         await user.save();
 
@@ -206,27 +316,119 @@ export const resetPassword = async (req, res) => {
     }
 };
 
-export const resendResetEmail = async (req, res) => {
-    const { email } = req.body;
 
-    const user = await User.findOne({ email });
+export const verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.params;
 
-    if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        const hashedToken = crypto
+            .createHash("sha256")
+            .update(token)
+            .digest("hex");
+
+        const user = await User.findOne({
+            verificationToken: hashedToken,
+            verificationExpire: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: "Invalid or expired token" });
+        }
+
+        user.isVerified = true; 
+        user.verificationToken = undefined;
+        user.verificationExpire = undefined;
+
+        await user.save();
+
+        res.send(`
+            <h2>Email Verified Successfully ✅</h2>
+            <p>You can now return to login.</p>
+        `);
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
+};
 
-    const { resetToken, hashedToken } = generateResetToken();
+export const resendVerification = async (req, res) => {
+    try {
+        const { email } = req.body;
 
-    user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpire = Date.now() + 24 * 60 * 60 * 1000;
+        const user = await User.findOne({ email });
 
-    await user.save();
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
 
-    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+        if (user.isVerified) {
+            return res.status(400).json({ message: "Already verified" });
+        }
 
-    const message = `<p>Reset again:</p><a href="${resetUrl}">${resetUrl}</a>`;
+        const verificationToken = crypto.randomBytes(20).toString("hex");
 
-    await sendEmail(email, "Reset Password", message);
+        user.verificationToken = crypto
+            .createHash("sha256")
+            .update(verificationToken)
+            .digest("hex");
 
-    res.json({ message: "Reset email resent" });
+        user.verificationExpire = Date.now() + 24 * 60 * 60 * 1000;
+
+        await user.save();
+
+        const verifyUrl = `http://localhost:8080/verify-email/${verificationToken}`;
+
+        const message = `
+        <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
+        <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+
+            <div style="background: linear-gradient(135deg, #065f46, #047857); padding: 20px; text-align: center; color: white;">
+            <h2 style="margin:0;">Verify Your Email</h2>
+            </div>
+
+            <div style="padding: 25px;">
+            <p>Hello <strong>${user.fullname}</strong>,</p>
+
+            <p style="color:#555;">
+                Please verify your email to activate your TalentFlow account.
+            </p>
+
+            <div style="margin:20px 0; padding:15px; background:#ecfdf5; border-left:4px solid #047857; border-radius:6px;">
+                <p style="margin:0; font-size:13px; color:#555;">Your TalentFlow ID</p>
+                <h3 style="margin:5px 0 0; color:#065f46;">${user.tfId}</h3>
+            </div>
+
+            <div style="text-align:center; margin-top:20px;">
+                <a href="${verifyUrl}" style="
+                padding:12px 25px;
+                background:#047857;
+                color:white;
+                border-radius:6px;
+                text-decoration:none;
+                font-weight:bold;
+                ">
+                Verify Email
+                </a>
+            </div>
+
+            <p style="margin-top:15px; font-size:12px; color:#888;">
+                This link will expire in 24 hours.
+            </p>
+            </div>
+
+            <div style="text-align:center; font-size:12px; color:#888; padding:15px;">
+            © ${new Date().getFullYear()} TrueMinds Ltd
+            </div>
+
+        </div>
+        </div>
+        `;
+
+        await sendEmail(email, "Verify Your Email", message);
+
+        res.json({ message: "Verification email resent" });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };
