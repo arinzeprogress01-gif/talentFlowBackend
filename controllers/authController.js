@@ -206,29 +206,45 @@ export const resendTfId = async (req, res) => {
 
         const message = `
         <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
-        <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+            <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+                
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, #065f46, #047857); padding: 25px; text-align: center; color: white;">
+                    <h1 style="margin: 0;">Your TalentFlow ID</h1>
+                    <p style="margin-top: 8px; font-size: 14px; opacity: 0.9;">
+                        Powered by TrueMinds Ltd
+                    </p>
+                </div>
 
-            <div style="background: linear-gradient(135deg, #065f46, #047857); padding: 20px; text-align: center; color: white;">
-            <h2 style="margin:0;">Your TalentFlow ID</h2>
+                <!-- Body -->
+                <div style="padding: 30px;">
+                    <p style="font-size: 16px;">Hello <strong>${user.fullname}</strong>,</p>
+
+                    <p style="color:#555; line-height:1.6;">
+                        As requested, here is your official TalentFlow Identification Number. This ID is unique to you and serves as your identity across the TalentFlow ecosystem.
+                    </p>
+
+                    <div style="margin: 25px 0; padding: 20px; background: #ecfdf5; border-left: 5px solid #047857; border-radius: 8px;">
+                        <p style="margin:0; font-size:14px; color:#555;">Your TalentFlow ID</p>
+                        <h2 style="margin:5px 0 0; color:#065f46;">
+                            ${user.tfId}
+                        </h2>
+                    </div>
+
+                    <p style="color:#555; line-height:1.6;">
+                        Keep this ID safe — it will be required for verification, onboarding, and tracking your progress throughout your journey.
+                    </p>
+
+                    <p style="color:#555;">
+                        If you did not request this, please ignore this message.
+                    </p>
+                </div>
+
+                <!-- Footer -->
+                <div style="background:#f9fafb; padding:15px; text-align:center; font-size:12px; color:#888;">
+                    © ${new Date().getFullYear()} TrueMinds Ltd - TalentFlow
+                </div>
             </div>
-
-            <div style="padding: 25px;">
-            <p style="font-size:15px;">Hello <strong>${user.fullname}</strong>,</p>
-
-            <p style="color:#555;">Here is your TalentFlow identification number:</p>
-
-            <div style="margin:20px 0; padding:15px; background:#ecfdf5; border-left:4px solid #047857; border-radius:6px;">
-                <h2 style="margin:0; color:#065f46; letter-spacing:1px;">${user.tfId}</h2>
-            </div>
-
-            <p style="color:#555;">Keep this safe — it will be used across your TalentFlow journey.</p>
-            </div>
-
-            <div style="text-align:center; font-size:12px; color:#888; padding:15px;">
-            © ${new Date().getFullYear()} TrueMinds Ltd
-            </div>
-
-        </div>
         </div>
         `;
 
@@ -275,39 +291,41 @@ export const forgotPassword = async (req, res) => {
                 
                 <!-- Header -->
                 <div style="background: linear-gradient(135deg, #065f46, #047857); padding: 25px; text-align: center; color: white;">
-                    <h1 style="margin: 0; font-size: 24px;">Reset Your Password</h1>
+                    <h1 style="margin: 0;">Password Reset Request</h1>
                 </div>
 
                 <!-- Body -->
                 <div style="padding: 30px;">
-                    <p style="font-size: 16px; color: #333;">Hello <strong>${user.fullname}</strong>,</p>
+                    <p>Hello <strong>${user.fullname}</strong>,</p>
 
-                    <p style="font-size: 15px; color: #555; line-height: 1.6;">
-                        We received a request to reset your password. Click the button below to continue:
+                    <p style="color:#555; line-height:1.6;">
+                        We received a request to reset your TalentFlow account password. If this was you, click the button below to securely create a new password.
                     </p>
 
-                    <div style="text-align: center; margin: 30px 0;">
+                    <div style="text-align:center; margin:30px 0;">
                         <a href="${resetUrl}" style="
-                            display: inline-block;
-                            padding: 12px 25px;
-                            background: #10e662;
-                            color: white;
-                            border-radius: 6px;
-                            text-decoration: none;
-                            font-weight: bold;
+                            background:#047857;
+                            color:white;
+                            padding:14px 28px;
+                            text-decoration:none;
+                            border-radius:6px;
+                            font-weight:bold;
                         ">
-                            Reset Password
+                            RESET PASSWORD
                         </a>
                     </div>
 
-                    <p style="font-size: 12px; color: #888;">
-                        This link will expire in 24 hours. If you didn’t request this, ignore this email.
+                    <p style="color:#555;">
+                        This link will expire in <strong>24 hours</strong> for security reasons.
+                    </p>
+
+                    <p style="color:#999;">
+                        If you did not request this, please ignore this email. Your account remains secure.
                     </p>
                 </div>
 
-                <!-- Footer -->
-                <div style="background: #f9fafb; padding: 15px; text-align: center; font-size: 12px; color: #888;">
-                    <p style="margin: 0;">© ${new Date().getFullYear()} TrueMinds Ltd - TalentFlow</p>
+                <div style="background:#f9fafb; padding:15px; text-align:center; font-size:12px; color:#888;">
+                    TrueMinds Ltd • TalentFlow Security
                 </div>
             </div>
         </div>
@@ -422,47 +440,47 @@ export const resendVerification = async (req, res) => {
 
         const message = `
         <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
-        <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+            <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+                
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, #065f46, #047857); padding: 25px; text-align: center; color: white;">
+                    <h1>Email Verification Required</h1>
+                </div>
 
-            <div style="background: linear-gradient(135deg, #065f46, #047857); padding: 20px; text-align: center; color: white;">
-            <h2 style="margin:0;">Verify Your Email</h2>
+                <!-- Body -->
+                <div style="padding: 30px;">
+                    <p>Hello <strong>${user.fullname}</strong>,</p>
+
+                    <p style="color:#555; line-height:1.6;">
+                        You're one step away from activating your TalentFlow account. Please confirm your email address to unlock full access to the platform.
+                    </p>
+
+                    <div style="margin:20px 0; padding:15px; background:#ecfdf5; border-left:5px solid #047857;">
+                        <strong>Your ID:</strong> ${user.tfId}
+                    </div>
+
+                    <div style="text-align:center; margin-top:25px;">
+                        <a href="${verifyUrl}" style="
+                            background:#047857;
+                            color:white;
+                            padding:12px 25px;
+                            border-radius:6px;
+                            text-decoration:none;
+                            font-weight:bold;
+                        ">
+                            VERIFY MY EMAIL
+                        </a>
+                    </div>
+
+                    <p style="margin-top:15px; font-size:12px; color:#999;">
+                        This verification link expires in 24 hours.
+                    </p>
+                </div>
+
+                <div style="background:#f9fafb; padding:15px; text-align:center; font-size:12px; color:#888;">
+                    TalentFlow • TrueMinds Ltd
+                </div>
             </div>
-
-            <div style="padding: 25px;">
-            <p>Hello <strong>${user.fullname}</strong>,</p>
-
-            <p style="color:#555;">
-                Please verify your email to activate your TalentFlow account.
-            </p>
-
-            <div style="margin:20px 0; padding:15px; background:#ecfdf5; border-left:4px solid #047857; border-radius:6px;">
-                <p style="margin:0; font-size:13px; color:#555;">Your TalentFlow ID</p>
-                <h3 style="margin:5px 0 0; color:#065f46;">${user.tfId}</h3>
-            </div>
-
-            <div style="text-align:center; margin-top:20px;">
-                <a href="${verifyUrl}" style="
-                padding:12px 25px;
-                background:#047857;
-                color:white;
-                border-radius:6px;
-                text-decoration:none;
-                font-weight:bold;
-                ">
-                Verify Email
-                </a>
-            </div>
-
-            <p style="margin-top:15px; font-size:12px; color:#888;">
-                This link will expire in 24 hours.
-            </p>
-            </div>
-
-            <div style="text-align:center; font-size:12px; color:#888; padding:15px;">
-            © ${new Date().getFullYear()} TrueMinds Ltd
-            </div>
-
-        </div>
         </div>
         `;
 
@@ -524,7 +542,7 @@ export const selectRole = async (req, res) => {
                         Your ${role === "learner" ? "learning" : "teaching"} journey with TalentFlow is now active.
                     </p>
 
-                    <div style="background:#ecfdf5;padding:15px;border-left:5px solid #067a236c;border-radius:6px;margin:20px 0;">
+                    <div style="background:#ecfdf5;padding:15px;border-left:5px solid #047857;border-radius:6px;margin:20px 0;">
                         <strong>Your Reference Number:</strong><br/>
                         <span style="font-size:18px;color:#10e662;">${refId}</span>
                     </div>
@@ -586,25 +604,66 @@ export const verifyRole = async (req, res) => {
 
         // 🔥 FINAL EMAIL
         const message = `
-        <div style="font-family: Arial; background:#f4f6fb; padding:20px;">
-            <div style="max-width:600px;margin:auto;background:#fff;border-radius:10px;">
+        <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
                 
-                <div style="background: linear-gradient(135deg, #065f46, #047857);padding:20px;text-align:center;color:white;">
-                    <h2>Welcome to TalentFlow 🚀</h2>
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, #065f46, #047857); padding: 25px; text-align: center; color: white;">
+                    <h1>Welcome to TalentFlow 🎉</h1>
+                    <p style="opacity:0.9;">Your journey officially begins now</p>
                 </div>
 
-                <div style="padding:25px;">
-                    <p>Hello ${user.fullname},</p>
+                <!-- Body -->
+                <div style="padding: 30px;">
+                    <p>Hello <strong>${user.fullname}</strong>,</p>
 
-                    <p>
-                        Your verification is complete. You are now officially enrolled in:
+                    <p style="color:#555; line-height:1.6;">
+                        Congratulations — your verification has been successfully completed and your profile is now fully active on TalentFlow.
                     </p>
 
-                    <h3 style="color:#10e662;">${course}</h3>
+                    <div style="margin:20px 0; padding:20px; background:#ecfdf5; border-left:5px solid #047857;">
+                        <p style="margin:0;">Reference Number</p>
+                        <h2 style="margin:5px 0 0; color:#065f46;">
+                            ${referenceNumber}
+                        </h2>
+                    </div>
 
-                    <p>
-                        Your journey starts now. Build, learn, grow, and make impact.
+                    <p style="color:#555;">
+                        You are now officially enrolled as a <strong>${role}</strong> in:
                     </p>
+
+                    <p style="font-weight:bold; color:#065f46;">
+                        ${course}
+                    </p>
+
+                    <p style="color:#555; line-height:1.6;">
+                        This marks the beginning of your growth journey. TalentFlow is designed to help you build real-world skills, collaborate with others, and achieve meaningful progress in your chosen path.
+                    </p>
+
+                    <p style="color:#555; line-height:1.6;">
+                        Stay consistent. Stay disciplined. Keep building. The platform is here to guide and support you every step of the way.
+                    </p>
+
+                    <p style="color:#555;">
+                        You can always explore and enroll in additional courses as you grow.
+                    </p>
+
+                    <div style="text-align:center; margin-top:30px;">
+                        <a href="#" style="
+                            background:#047857;
+                            color:white;
+                            padding:12px 25px;
+                            border-radius:6px;
+                            text-decoration:none;
+                            font-weight:bold;
+                        ">
+                            START YOUR JOURNEY
+                        </a>
+                    </div>
+                </div>
+
+                <div style="background:#f9fafb; padding:15px; text-align:center; font-size:12px; color:#888;">
+                    © ${new Date().getFullYear()} TrueMinds Ltd • TalentFlow
                 </div>
             </div>
         </div>
