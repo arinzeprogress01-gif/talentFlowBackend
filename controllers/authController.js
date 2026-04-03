@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import generateTfId from "../utils/generateTfId.js";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/email.js";
-import generateResetToken from "../utils/generateResetToken.js";
 import crypto from "crypto"
 
 export const registerUser = async (req, res) => {
@@ -241,56 +240,100 @@ export const resendTfId = async (req, res) => {
     }
 };
 
+
+
+// --------------------
+// FORGOT PASSWORD
+// --------------------
 export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
 
+        // 1️⃣ Find user
         const user = await User.findOne({ email });
-
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        const { resetToken, hashedToken } = generateResetToken();
+        // 2️⃣ Generate reset token
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
-        user.resetPassWordToken = hashedToken;
-        user.resetPassWordExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-
+        // 3️⃣ Save hashed token and expiry to user
+        user.resetPasswordToken = hashedToken;
+        user.resetPasswordExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
         await user.save();
 
-        const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+        // 4️⃣ Build reset URL (use client URL from env)
+        const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
+        // 5️⃣ Create beautiful emerald green email
         const message = `
-            <h2>Reset Your Password</h2>
-            <p>Hello ${user.fullname},</p>
-            <p>We received a request to reset your password.</p>
-            <p>Click the button below to continue:</p>
-            <a href="${resetUrl}" style="padding:10px 20px;background:#4f46e5;color:#fff;border-radius:5px;text-decoration:none;">
-                Reset Password
-            </a>
-            <p>This link will expire in 24 hours.</p>
-            <p>If you didn’t request this, ignore this email.</p>
+        <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+                
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, #076e21, #0b8b3c); padding: 25px; text-align: center; color: white;">
+                    <h1 style="margin: 0; font-size: 24px;">Reset Your Password</h1>
+                </div>
+
+                <!-- Body -->
+                <div style="padding: 30px;">
+                    <p style="font-size: 16px; color: #333;">Hello <strong>${user.fullname}</strong>,</p>
+
+                    <p style="font-size: 15px; color: #555; line-height: 1.6;">
+                        We received a request to reset your password. Click the button below to continue:
+                    </p>
+
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${resetUrl}" style="
+                            display: inline-block;
+                            padding: 12px 25px;
+                            background: #10e662;
+                            color: white;
+                            border-radius: 6px;
+                            text-decoration: none;
+                            font-weight: bold;
+                        ">
+                            Reset Password
+                        </a>
+                    </div>
+
+                    <p style="font-size: 12px; color: #888;">
+                        This link will expire in 24 hours. If you didn’t request this, ignore this email.
+                    </p>
+                </div>
+
+                <!-- Footer -->
+                <div style="background: #f9fafb; padding: 15px; text-align: center; font-size: 12px; color: #888;">
+                    <p style="margin: 0;">© ${new Date().getFullYear()} TrueMinds Ltd - TalentFlow</p>
+                </div>
+            </div>
+        </div>
         `;
 
-        await sendEmail(email, "Password Reset", message);
+        // 6️⃣ Send email
+        await sendEmail(email, "TalentFlow Password Reset", message);
 
         res.json({ message: "Reset email sent" });
-
+        console.log(`Password reset email sent to ${email} with token: ${resetToken}`);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
+// --------------------
+// RESET PASSWORD
+// --------------------
 export const resetPassword = async (req, res) => {
     try {
         const { token } = req.params;
         const { password } = req.body;
 
-        const hashedToken = crypto
-            .createHash("sha256")
-            .update(token)
-            .digest("hex");
+        // 1️⃣ Hash the token to match DB
+        const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
+        // 2️⃣ Find user with valid token
         const user = await User.findOne({
             resetPasswordToken: hashedToken,
             resetPasswordExpire: { $gt: Date.now() },
@@ -300,22 +343,20 @@ export const resetPassword = async (req, res) => {
             return res.status(400).json({ message: "Invalid or expired token" });
         }
 
-        // Hash new password
+        // 3️⃣ Hash new password and save
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
 
-        user.resetPassWordToken = undefined;
-        user.resetPassWordExpire = undefined;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
 
         await user.save();
 
         res.json({ message: "Password reset successful" });
-
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
-
 
 export const verifyEmail = async (req, res) => {
     try {
