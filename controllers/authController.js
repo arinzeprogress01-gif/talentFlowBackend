@@ -9,9 +9,9 @@ import generateRoleId from "../utils/generateRoleId.js";
 export const registerUser = async (req, res) => {
         
     try {
-        const { fullname, email, password, confirmPassword } = req.body;
+        const { fullName, email, password, confirmPassword } = req.body;
 
-        if (!fullname || !email || !password || !confirmPassword) {
+        if (! || !email || !password || !confirmPassword) {
             return res.status(400).json({ message: "All fields are required" });
         }
         
@@ -44,7 +44,7 @@ export const registerUser = async (req, res) => {
 
         // Create user
         const user = await User.create({
-            fullname,
+            fullName,
             email,
             password: hashedPassword,
             tfId,
@@ -69,7 +69,7 @@ export const registerUser = async (req, res) => {
 
                 <!-- Body -->
                 <div style="padding: 30px;">
-                    <p style="font-size: 16px; color: #333;">Hello <strong>${fullname}</strong>,</p>
+                    <p style="font-size: 16px; color: #333;">Hello <strong>${fullName}</strong>,</p>
 
                     <p style="font-size: 15px; color: #555; line-height: 1.6;">
                         We’re excited to have you join a growing community of individuals committed to learning, building, and becoming more.
@@ -182,7 +182,7 @@ export const loginUser = async (req, res) => {
             message: "Login successful",
             token,
             user: {
-                fullname: user.fullname,
+                fullName: user.fullName,
                 email: user.email,
                 tfId: user.tfId,
                 role: user.role,
@@ -218,7 +218,7 @@ export const resendTfId = async (req, res) => {
 
                 <!-- Body -->
                 <div style="padding: 30px;">
-                    <p style="font-size: 16px;">Hello <strong>${user.fullname}</strong>,</p>
+                    <p style="font-size: 16px;">Hello <strong>${user.fullName}</strong>,</p>
 
                     <p style="color:#555; line-height:1.6;">
                         As requested, here is your official TalentFlow Identification Number. This ID is unique to you and serves as your identity across the TalentFlow ecosystem.
@@ -296,7 +296,7 @@ export const forgotPassword = async (req, res) => {
 
                 <!-- Body -->
                 <div style="padding: 30px;">
-                    <p>Hello <strong>${user.fullname}</strong>,</p>
+                    <p>Hello <strong>${user.fullName}</strong>,</p>
 
                     <p style="color:#555; line-height:1.6;">
                         We received a request to reset your TalentFlow account password. If this was you, click the button below to securely create a new password.
@@ -449,7 +449,7 @@ export const resendVerification = async (req, res) => {
 
                 <!-- Body -->
                 <div style="padding: 30px;">
-                    <p>Hello <strong>${user.fullname}</strong>,</p>
+                    <p>Hello <strong>${user.fullName}</strong>,</p>
 
                     <p style="color:#555; line-height:1.6;">
                         You're one step away from activating your TalentFlow account. Please confirm your email address to unlock full access to the platform.
@@ -536,7 +536,7 @@ export const selectRole = async (req, res) => {
                 </div>
 
                 <div style="padding:25px;">
-                    <p>Hello ${user.fullname},</p>
+                    <p>Hello ${user.fullName},</p>
 
                     <p>
                         Your ${role === "learner" ? "learning" : "teaching"} journey with TalentFlow is now active.
@@ -574,7 +574,7 @@ export const selectRole = async (req, res) => {
 
 export const verifyRole = async (req, res) => {
     try {
-        const { fullname, referenceNumber, course } = req.body;
+        const { fullName, referenceNumber, course } = req.body;
 
         const user = await User.findById(req.user.id);
 
@@ -593,7 +593,7 @@ export const verifyRole = async (req, res) => {
         }
 
         // Match name
-        if (user.fullname !== fullname) {
+        if (user.fullName !== fullName) {
             return res.status(400).json({ message: "Name does not match records" });
         }
 
@@ -615,7 +615,7 @@ export const verifyRole = async (req, res) => {
 
                 <!-- Body -->
                 <div style="padding: 30px;">
-                    <p>Hello <strong>${user.fullname}</strong>,</p>
+                    <p>Hello <strong>${user.fullName}</strong>,</p>
 
                     <p style="color:#555; line-height:1.6;">
                         Congratulations — your verification has been successfully completed and your profile is now fully active on TalentFlow.
