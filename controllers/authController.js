@@ -629,11 +629,11 @@ export const verifyRole = async (req, res) => {
                     </div>
 
                     <p style="color:#555;">
-                        You are now officially enrolled as a <strong>${role}</strong> in:
+                        You are now officially enrolled in the <strong>${course}</strong> course. This is your first step towards building real-world skills and achieving your goals with TalentFlow.:
                     </p>
 
                     <p style="font-weight:bold; color:#065f46;">
-                        ${course}
+                        GROW IN IT
                     </p>
 
                     <p style="color:#555; line-height:1.6;">
