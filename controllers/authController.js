@@ -53,7 +53,7 @@ export const registerUser = async (req, res) => {
         });
 
         // 🔥 SEND EMAIL
-        const verifyUrl = `http://localhost:8080/api/auth/verify-email/${verificationToken}`;
+        const verifyUrl = `${process.env.BASE_URL}/api/auth/verify-email/${verificationToken}`;
 
         const message = `
         <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
