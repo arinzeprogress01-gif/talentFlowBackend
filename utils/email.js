@@ -2,18 +2,15 @@ import nodemailer from "nodemailer";
 
 const sendEmail = async (to, subject, html) => {
     try {
-        const testAccount = await nodemailer.createTestAccount();
         const transporter = nodemailer.createTransport({
-            host: "smtp.ethereal.email",
+            host: "smtp.gmail.com",
             port: 587,
+            secure: false, // MUST be false for 587
             auth: {
-                user: testAccount.user,
-                pass: testAccount.pass,
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
             },
-            connectionTimeout: 10000,
-            greetingTimeout: 10000,
-            socketTimeout: 10000,
-         });
+        });
 
          transporter.verify((error, success) => {
             if (error) {
