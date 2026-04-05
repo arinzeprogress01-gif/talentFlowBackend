@@ -3,15 +3,14 @@ import nodemailer from "nodemailer";
 const sendEmail = async (to, subject, html) => {
     try {
         const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
+            host: "smtp-relay.brevo.com",
             port: 587,
-            secure: false, // MUST be false for 587
+            secure: false,
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS,
             },
         });
-
          transporter.verify((error, success) => {
             if (error) {
                 console.log("SMTP ERROR:", error);
@@ -21,7 +20,7 @@ const sendEmail = async (to, subject, html) => {
         });
 
         const mailOptions = {
-            from: `"TalentFlow" <${process.env.EMAIL_USER}>`,
+            from: `"TalentFlow Innovation LTD" <${process.env.EMAIL_USER1}>`,
             to,
             subject,
             html,
