@@ -12,7 +12,7 @@ const sendEmail = async (to, subject, html) => {
             html, 
         });
 
-        console.log("Email sent successfully");
+        console.log("Email has been sent successfully");
     } catch (error) {
         console.error("Email error:", error.message);
     }
