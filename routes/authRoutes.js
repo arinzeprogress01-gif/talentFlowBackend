@@ -28,4 +28,8 @@ router.put("/select-role", protect, selectRole);
 
 router.put("/verify-role", protect, verifyRole);
 
+router.get("/protected", protect, (req, res) => {
+    res.json({ message: "You have accessed a protected route!", user: req.user });
+});
+
 export default router;

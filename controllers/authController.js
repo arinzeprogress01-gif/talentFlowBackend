@@ -6,6 +6,7 @@ import sendEmail from "../utils/email.js";
 import crypto from "crypto"
 import generateRoleId from "../utils/generateRoleId.js";
 import Progress from "../models/Progress.js";
+import Course from "../models/Course.js";
 
 export const registerUser = async (req, res) => {
         
@@ -574,9 +575,16 @@ export const selectRole = async (req, res) => {
     }
 };
 
+
 export const verifyRole = async (req, res) => {
     try {
-        const { fullName, referenceNumber, course } = req.body;
+        const { fullName, referenceNumber, courseId } = req.body;
+
+        const selectedCourse = await Course.findById(courseId);
+
+        if (!selectedCourse) {
+            return res.status(404).json({ message: "Course not found" });
+        }
 
         const user = await User.findById(req.user.id);
 
@@ -599,7 +607,7 @@ export const verifyRole = async (req, res) => {
             return res.status(400).json({ message: "Name does not match records" });
         }
 
-        user.selectedCourse = course;
+        user.selectedCourse = selectedCourse.title;
         user.isRoleVerified = true;
 
         await user.save();
@@ -613,9 +621,9 @@ if (!existingProgress) {
 
         courses: [
             {
-                title: course,
-                instructor: "TalentFlow Instructor",
-                totalModules: 10,
+                title: selectedCourse.title,
+                instructor: selectedCourse.instructor,
+                totalModules: selectedCourse.totalModules,
                 modulesCompleted: 0,
                 progress: 0,
                 completed: false
