@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import sendEmail from "../utils/email.js";
 import crypto from "crypto"
 import generateRoleId from "../utils/generateRoleId.js";
+import Progress from "../models/Progress.js";
 
 export const registerUser = async (req, res) => {
         
@@ -603,6 +604,41 @@ export const verifyRole = async (req, res) => {
 
         await user.save();
 
+        // 🔥 CREATE PROGRESS FOR USER (ONLY IF NOT EXIST)
+const existingProgress = await Progress.findOne({ user: user._id });
+
+if (!existingProgress) {
+    await Progress.create({
+        user: user._id,
+
+        courses: [
+            {
+                title: course,
+                instructor: "TalentFlow Instructor",
+                totalModules: 10,
+                modulesCompleted: 0,
+                progress: 0,
+                completed: false
+            }
+        ],
+
+        milestones: [
+            {
+                title: "Joined TalentFlow",
+                date: new Date().toDateString(),
+                achieved: true
+            },
+            {
+                title: "First Course Enrolled",
+                date: new Date().toDateString(),
+                achieved: true
+            }
+        ],
+
+        learningDays: 1
+    });
+}
+
         // 🔥 FINAL EMAIL
         const message = `
         <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
@@ -676,6 +712,128 @@ export const verifyRole = async (req, res) => {
             message: "Verification successful",
             course
         });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const getProgress = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const progress = await Progress.findOne({ user: userId });
+
+        if (!progress) {
+            return res.status(404).json({ message: "No progress found" });
+        }
+
+        // 🔥 CALCULATE OVERALL STATS
+        const totalCourses = progress.courses.length;
+
+        const completedCourses = progress.courses.filter(c => c.completed).length;
+
+        const inProgress = totalCourses - completedCourses;
+
+        const avgCompletion =
+            progress.courses.reduce((acc, c) => acc + c.progress, 0) /
+            totalCourses;
+
+        const overallStats = {
+            completionPercentage: Math.round(avgCompletion),
+            coursesCompleted: completedCourses,
+            inProgress,
+            learningDays: progress.learningDays,
+            encouragement: "You're making great progress! Keep going 🚀"
+        };
+
+        res.json({
+            overallStats,
+            courses: progress.courses,
+            milestones: progress.milestones
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+//  UPDATE COURSE PROGRESS
+export const updateCourseProgress = async (req, res) => {
+    try {
+        const { courseName } = req.body;
+
+        const progress = await Progress.findOne({ user: req.user.id });
+
+        if (!progress) {
+            return res.status(404).json({ message: "Progress not found" });
+        }
+
+        const course = progress.courses.find(c => c.title === courseName);
+
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        // 🔥 Increase module count
+        course.modulesCompleted += 1;
+
+        // 🔥 Auto calculate progress
+        course.progress = Math.round(
+            (course.modulesCompleted / course.totalModules) * 100
+        );
+
+        // 🔥 Mark complete
+        if (course.progress === 100) {
+            course.completed = true;
+
+            progress.milestones.push({
+                title: `${courseName} Completed`,
+                date: new Date().toDateString(),
+                achieved: true
+            });
+        }
+
+        // 🔥 Update learning streak
+        const today = new Date();
+        const last = progress.lastActive;
+
+        const diff = (today - last) / (1000 * 60 * 60 * 24);
+
+        if (diff < 1) {
+            // same day → nothing
+        } else if (diff < 2) {
+            progress.learningDays += 1;
+        } else {
+            progress.learningDays = 1;
+        }
+
+        progress.lastActive = today;
+
+        await progress.save();
+
+        res.json({
+            message: "Progress updated",
+            course
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+// GET USER PROGRESS
+export const getUserProgress = async (req, res) => {
+    try {
+        const progress = await Progress.findOne({ user: req.user.id });
+
+        if (!progress) {
+            return res.status(404).json({ message: "No progress found" });
+        }
+
+        res.json(progress);
 
     } catch (error) {
         res.status(500).json({ message: error.message });
