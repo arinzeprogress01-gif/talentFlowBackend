@@ -1,7 +1,7 @@
 
 import { Resend } from "resend";
 
-const resend = new Resend('re_ze_eyeUJw21_D5fBHfCDRvW84CvJJwugkDPo');
+const resend = new Resend('re_At9TUuwd_EQML41Eji6N3P5Mh3m9FLXjZ');
 
 const sendEmail = async (to, subject, html) => {
     try {
