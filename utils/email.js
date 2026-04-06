@@ -1,5 +1,32 @@
+import nodemailer from "nodemailer";
 
-import { Resend } from "resend";
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+    }
+});
+
+const sendEmail = async (to, subject, html) => {
+    try {
+        const info = await transporter.sendMail({
+            from: '"TalentFlow - TrueMinds" <no-reply@talentflow.com>',
+            to,
+            subject,
+            html
+        });
+
+        console.log("Email sent:", info.messageId);
+    } catch (error) {
+        console.error("Email error:", error.message);
+    }
+};
+
+export default sendEmail;
+
+/*import { Resend } from "resend";
 
 const resend = new Resend('re_At9TUuwd_EQML41Eji6N3P5Mh3m9FLXjZ');
 
@@ -19,6 +46,7 @@ const sendEmail = async (to, subject, html) => {
 };
 
 export default sendEmail;
+*/
 
 /*import axios from "axios";
 
