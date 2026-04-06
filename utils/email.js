@@ -1,12 +1,12 @@
 
 import { Resend } from "resend";
 
-const resend = new Resend('resp_ze_eyeUJw21_D5fBHfCDRvW84CvJJwugkDPo');
+const resend = new Resend('re_ze_eyeUJw21_D5fBHfCDRvW84CvJJwugkDPo');
 
 const sendEmail = async (to, subject, html) => {
     try {
         await resend.emails.send({
-            from: "TalentFlow_-TrueMinds LTD<onboarding@resend.dev>", // temporary sender
+            from: "TalentFlow-TrueMinds LTD<onboarding@resend.dev>", // temporary sender
             to,
             subject,
             html, 
