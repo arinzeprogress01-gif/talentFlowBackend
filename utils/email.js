@@ -1,4 +1,26 @@
-import axios from "axios";
+
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const sendEmail = async (to, subject, html) => {
+    try {
+        await resend.emails.send({
+            from: "TalentFlow_-TrueMinds LTD<onboarding@resend.dev>", // temporary sender
+            to,
+            subject,
+            html,
+        });
+
+        console.log("Email sent successfully");
+    } catch (error) {
+        console.error("Email error:", error.message);
+    }
+};
+
+export default sendEmail;
+
+/*import axios from "axios";
 
 const sendEmail = async (to, subject, html) => {
     try {
@@ -31,3 +53,4 @@ const sendEmail = async (to, subject, html) => {
 };
 
 export default sendEmail;
+*/
