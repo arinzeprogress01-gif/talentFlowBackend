@@ -9,7 +9,7 @@ const sendEmail = async (to, subject, html) => {
             from: "TalentFlow_-TrueMinds LTD<onboarding@resend.dev>", // temporary sender
             to,
             subject,
-            html,
+            html, 
         });
 
         console.log("Email sent successfully");
