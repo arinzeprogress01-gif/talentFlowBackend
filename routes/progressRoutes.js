@@ -2,7 +2,7 @@ import express from "express";
 import {
     updateCourseProgress,
     getUserProgress, getProgress
-} from "../controllers/authController.js";
+} from "../controllers/progressController.js";
 
 import protect from "../middleware/authMiddleware.js";
 

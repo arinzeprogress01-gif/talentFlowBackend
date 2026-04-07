@@ -1,7 +1,7 @@
 import express from "express";
 
 import authRoutes from "./routes/authRoutes.js";
-
+import userRoutes from "./routes/userRoutes.js";
 import progressRoutes from "./routes/progressRoutes.js";
 import courseRoutes from "./routes/courseRoutes.js";
 
@@ -10,6 +10,8 @@ import courseRoutes from "./routes/courseRoutes.js";
 const app = express();
 
 app.use(express.json());
+
+app.use("/api/user", userRoutes);
 
 app.use("/api/auth", authRoutes);
 

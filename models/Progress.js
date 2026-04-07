@@ -31,6 +31,7 @@ const courseProgressSchema = new mongoose.Schema({
 const milestoneSchema = new mongoose.Schema({
     title: String,
     date: String,
+    course: String,
     achieved: {
         type: Boolean,
         default: false
