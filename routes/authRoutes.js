@@ -23,7 +23,6 @@ router.post("/forgot-password", forgotPassword);
 
 router.put("/reset-password/:token", resetPassword);
 
-
 router.put("/select-role", protect, selectRole);
 
 router.put("/verify-role", protect, verifyRole);

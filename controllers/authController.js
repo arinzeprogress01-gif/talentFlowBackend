@@ -718,7 +718,7 @@ if (!existingProgress) {
 
         res.json({
             message: "Verification successful",
-            course
+            selectedCourse
         });
 
     } catch (error) {
