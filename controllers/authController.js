@@ -674,7 +674,7 @@ if (!existingProgress) {
                     </div>
 
                     <p style="color:#555;">
-                        You are now officially enrolled in the <strong>${course}</strong> course. This is your first step towards building real-world skills and achieving your goals with TalentFlow.:
+                        You are now officially enrolled in the <strong>${selectedCourse.title}</strong> course. This is your first step towards building real-world skills and achieving your goals with TalentFlow.:
                     </p>
 
                     <p style="font-weight:bold; color:#065f46;">
