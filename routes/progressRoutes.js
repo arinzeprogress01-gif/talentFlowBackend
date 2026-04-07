@@ -12,6 +12,6 @@ router.get("/userProgress", protect, getUserProgress);
 
 router.put("/update", protect, updateCourseProgress);
 
-router.get("/progress", protect, getProgress);
+router.get("/", protect, getProgress);
 
 export default router;
