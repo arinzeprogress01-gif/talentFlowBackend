@@ -284,7 +284,7 @@ export const forgotPassword = async (req, res) => {
         await user.save();
 
         // 4️⃣ Build reset URL (use client URL from env)
-        const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+        const resetUrl = `${process.env.BASE_URL}/api/auth/forgot-password/${resetToken}`;
 
         // 5️⃣ Create beautiful emerald green email
         const message = `
