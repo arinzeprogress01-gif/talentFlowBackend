@@ -9,23 +9,19 @@ import Progress from "../models/Progress.js";
 import Course from "../models/Course.js";
 
 export const registerUser = async (req, res) => {
-        
     try {
-        const { fullName, email, password, confirmPassword } = req.body;
+        const { fullName, email, password, confirmPassword, role } = req.body;
 
         if (!fullName || !email || !password || !confirmPassword) {
             return res.status(400).json({ message: "All fields are required" });
         }
-        
+
         if (password !== confirmPassword) {
             return res.status(400).json({ message: "Passwords do not match" });
         }
-        if (!confirmPassword) {
-            return res.status(400).json({ message: "Confirm password is required" });
-        }
+
         // Check if user exists
         const userExists = await User.findOne({ email });
-
         if (userExists) {
             return res.status(400).json({ message: "User already exists" });
         }
@@ -44,20 +40,67 @@ export const registerUser = async (req, res) => {
             .update(verificationToken)
             .digest("hex");
 
+        // ✅ HANDLE ROLE (THIS IS THE ONLY REAL ADDITION)
+        let userRole = "learner"; // default
+
+        if (role === "tutor" || role === "admin" || role === "learner") {
+            userRole = role;
+        }
+
+        let refId;
+
+        if (userRole === "learner") {
+            refId = generateRoleId("LRN");
+        } else if (userRole === "tutor") {
+            refId = generateRoleId("TRN");
+        }
         // Create user
         const user = await User.create({
             fullName,
             email,
             password: hashedPassword,
             tfId,
+            role: userRole,
+
+            learnerRef: userRole === "learner" ? refId : undefined,
+            tutorRef: userRole === "tutor" ? refId : undefined,
+
             verificationToken: hashedToken,
-            verificationExpire: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+            verificationExpire: Date.now() + 24 * 60 * 60 * 1000,
         });
 
-        // 🔥 SEND EMAIL
+
+        // 🔥 EMAIL (ROLE EMAIL)
+        const message = `
+        <div style="font-family: Arial; background:#f4f6fb; padding:20px;">
+            <div style="max-width:600px;margin:auto;background:#fff;border-radius:10px;overflow:hidden;">
+                
+                <div style="background: linear-gradient(135deg, #065f46, #047857);padding:20px;text-align:center;color:white;">
+                    <h2>${userRole === "learner" ? "Learner Enrollment Successful 🎓" : "Tutor Application Approved 🏆"}</h2>
+                </div>
+
+                <div style="padding:25px;">
+                    <p>Hello ${user.fullName},</p>
+
+                    <p>
+                        Your ${userRole === "learner" ? "learning" : "teaching"} journey with TalentFlow is now active.
+                    </p>
+
+                    <div style="background:#ecfdf5;padding:15px;border-left:5px solid #047857;border-radius:6px;margin:20px 0;">
+                        <strong>Your Reference Number:</strong><br/>
+                        <span style="font-size:18px;color:#10e662;">${refId}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+
+        await sendEmail(user.email, "TalentFlow Role Confirmation", message);
+
+        // 🔥 VERIFY EMAIL
         const verifyUrl = `${process.env.BASE_URL}/api/auth/verify-email/${verificationToken}`;
 
-        const message = `
+        const message1 =`
         <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
             <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
                 
@@ -134,20 +177,24 @@ export const registerUser = async (req, res) => {
                 </div>
             </div>
         </div>
-        `;
+        `; 
 
-        sendEmail(email, "Welcome to TalentFlow", message)
+        sendEmail(email, "Welcome to TalentFlow", message1)
             .catch(err => console.error("Email failed:", err.message));
+
+        // ✅ SINGLE RESPONSE ONLY
         res.status(201).json({
             message: "User registered successfully",
             tfId: user.tfId,
+            role: user.role,
+            refId
         });
 
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
-
+        
 
 export const loginUser = async (req, res) => {
     try {
@@ -495,86 +542,6 @@ export const resendVerification = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
-
-export const selectRole = async (req, res) => {
-    try {
-        const { role } = req.body;
-
-        if (!["learner", "tutor"].includes(role)) {
-            return res.status(400).json({ message: "Invalid role" });
-        }
-
-        const user = await User.findById(req.user.id);
-
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        if (user.role !== null) {
-            return res.status(400).json({ message: "Role already selected" });
-        }
-
-        user.role = role;
-
-        let refId;
-
-        if (role === "learner") {
-            refId = generateRoleId("LRN");
-            user.learnerRef = refId;
-        } else {
-            refId = generateRoleId("TRN");
-            user.tutorRef = refId;
-        }
-
-        await user.save();
-
-        // 🔥 EMAIL (APPROVAL EMAIL)
-        const message = `
-        <div style="font-family: Arial; background:#f4f6fb; padding:20px;">
-            <div style="max-width:600px;margin:auto;background:#fff;border-radius:10px;overflow:hidden;">
-                
-                <div style="background: linear-gradient(135deg, #065f46, #047857);padding:20px;text-align:center;color:white;">
-                    <h2>${role === "learner" ? "Learner Enrollment Successful 🎓" : "Tutor Application Approved 🏆"}</h2>
-                </div>
-
-                <div style="padding:25px;">
-                    <p>Hello ${user.fullName},</p>
-
-                    <p>
-                        Your ${role === "learner" ? "learning" : "teaching"} journey with TalentFlow is now active.
-                    </p>
-
-                    <div style="background:#ecfdf5;padding:15px;border-left:5px solid #047857;border-radius:6px;margin:20px 0;">
-                        <strong>Your Reference Number:</strong><br/>
-                        <span style="font-size:18px;color:#10e662;">${refId}</span>
-                    </div>
-
-                    <p>
-                        You will need this reference number to complete your verification and access your dashboard.
-                    </p>
-
-                    <p>
-                        Continue your journey by completing your verification.
-                    </p>
-                </div>
-            </div>
-        </div>
-        `;
-
-        await sendEmail(user.email, "TalentFlow Role Confirmation", message);
-
-        res.json({
-            message: "Role selected. Check your email.",
-            role,
-            refId
-        });
-
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
 
 export const verifyRole = async (req, res) => {
     try {
