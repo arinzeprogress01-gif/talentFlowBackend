@@ -14,7 +14,7 @@ export const getUserProfile = async (req, res) => {
                 fullName: user.fullName,
                 email: user.email,
                 role: user.role,
-                isEmailVerified: user.isEmailVerified,
+                isEmailVerified: user.isVerified,
                 isRoleVerified: user.isRoleVerified,
                 selectedCourse: user.selectedCourse,
                 learnerRef: user.learnerRef,
