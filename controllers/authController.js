@@ -70,37 +70,10 @@ export const registerUser = async (req, res) => {
         });
 
 
-        // 🔥 EMAIL (ROLE EMAIL)
-        const message = `
-        <div style="font-family: Arial; background:#f4f6fb; padding:20px;">
-            <div style="max-width:600px;margin:auto;background:#fff;border-radius:10px;overflow:hidden;">
-                
-                <div style="background: linear-gradient(135deg, #065f46, #047857);padding:20px;text-align:center;color:white;">
-                    <h2>${userRole === "learner" ? "Learner Enrollment Successful 🎓" : "Tutor Application Approved 🏆"}</h2>
-                </div>
-
-                <div style="padding:25px;">
-                    <p>Hello ${user.fullName},</p>
-
-                    <p>
-                        Your ${userRole === "learner" ? "learning" : "teaching"} journey with TalentFlow is now active.
-                    </p>
-
-                    <div style="background:#ecfdf5;padding:15px;border-left:5px solid #047857;border-radius:6px;margin:20px 0;">
-                        <strong>Your Reference Number:</strong><br/>
-                        <span style="font-size:18px;color:#10e662;">${refId}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        `;
-
-        await sendEmail(user.email, "TalentFlow Role Confirmation", message);
-
-        // 🔥 VERIFY EMAIL
+        //🔥 EMAIL (ROLE EMAil) and 🔥 VERIFY EMAIL
         const verifyUrl = `${process.env.BASE_URL}/api/auth/verify-email/${verificationToken}`;
 
-        const message1 =`
+        const message1 = `
         <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
             <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
                 
@@ -121,16 +94,27 @@ export const registerUser = async (req, res) => {
                         Your journey toward mastering new skills and creating real impact starts here.
                     </p>
 
-                    <!-- TF ID Box -->
+                    <!-- ✅ TF ID + REF ID COMBINED BOX -->
                     <div style="margin: 25px 0; padding: 20px; background: #ecfdf5; border-left: 5px solid #047857; border-radius: 8px;">
                         <p style="margin: 0; font-size: 14px; color: #555;">Your TalentFlow ID</p>
-                        <h2 style="margin: 5px 0 0; color: #065f46; letter-spacing: 1px;">
+                        <h2 style="margin: 5px 0 10px; color: #065f46; letter-spacing: 1px;">
                             ${tfId}
                         </h2>
+
+                        ${
+                            refId
+                                ? `
+                        <p style="margin: 10px 0 0; font-size: 14px; color: #555;">Your Reference Number</p>
+                        <h3 style="margin: 5px 0 0; color: #047857;">
+                            ${refId}
+                        </h3>
+                        `
+                                : ""
+                        }
                     </div>
 
                     <p style="font-size: 15px; color: #555; line-height: 1.6;">
-                        Keep this ID safe — it will be important as you progress, verify your profile, and access key features on your dashboard.
+                        Keep these details safe — they will be important as you progress, verify your profile, and access key features on your dashboard.
                     </p>
 
                     <p style="font-size: 15px; color: #555; line-height: 1.6;">
@@ -177,7 +161,7 @@ export const registerUser = async (req, res) => {
                 </div>
             </div>
         </div>
-        `; 
+        `;
 
         try {
             await sendEmail(email, "Welcome to TalentFlow", message1);
