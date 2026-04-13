@@ -179,8 +179,11 @@ export const registerUser = async (req, res) => {
         </div>
         `; 
 
-        sendEmail(email, "Welcome to TalentFlow", message1)
-            .catch(err => console.error("Email failed:", err.message));
+        try {
+            await sendEmail(email, "Welcome to TalentFlow", message1);
+        } catch (err) {
+            console.error("Verification Email Failed:", err.message);
+        }
 
         // ✅ SINGLE RESPONSE ONLY
         res.status(201).json({
