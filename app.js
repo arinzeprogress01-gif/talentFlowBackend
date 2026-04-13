@@ -1,5 +1,5 @@
 import express from "express";
-
+import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import progressRoutes from "./routes/progressRoutes.js";
@@ -8,6 +8,11 @@ import courseRoutes from "./routes/courseRoutes.js";
 //import { seedCourses } from "./utils/seedCourses.js";
 
 const app = express();
+
+app.use(cors({
+    origin: "https://talent-flow-frontend-project.vercel.app",
+    credentials: true
+}));
 
 app.use(express.json());
 
