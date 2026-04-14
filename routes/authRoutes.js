@@ -6,7 +6,7 @@ import { forgotPassword, resetPassword, } from "../controllers/authController.js
 import { verifyRole } from "../controllers/authController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { logoutUser } from "../controllers/authController.js";
-import { verifyToken } from "../middleware/authMiddleware.js";
+
 
 
 const router = express.Router();
@@ -32,7 +32,7 @@ router.get("/protected", protect, (req, res) => {
     res.json({ message: "You have accessed a protected route!", user: req.user });
 });
 
-router.post("/logout", verifyToken, logoutUser);
+router.post("/logout", protect, logoutUser);
 
 export default router;
-export default router;
+
