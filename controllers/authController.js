@@ -530,9 +530,7 @@ export const resendVerification = async (req, res) => {
     }
 };
 
-import User from "../models/User.js";
-import Course from "../models/Course.js";
-import Progress from "../models/Progress.js";
+
 
 export const verifyRole = async (req, res) => {
     try {
