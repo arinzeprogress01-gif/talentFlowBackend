@@ -1,7 +1,7 @@
 import Course from "../models/Course.js";
 
 export const seedCourses = async () => {
-    const existing = await Course.countDocuments();//countDocuments is used to count the number of documents in the collection that match the specified query. If no query is provided, it counts all documents in the collection.
+    const existing = await Course.countDocuments();
 
     if (existing > 0) {
         console.log("Courses already exist");
@@ -9,15 +9,45 @@ export const seedCourses = async () => {
     }
 
     const courses = [
-        { title: "Frontend Development", category: "Tech" },
-        { title: "Backend Development", category: "Tech" },
-        { title: "UI/UX Design", category: "Design" },
-        { title: "Project Management", category: "Management" },
-        { title: "AI Integration", category: "AI" },
-        { title: "Machine Learning", category: "AI" }
+        {
+            title: "Frontend Development",
+            category: "Tech",
+            instructor: "TalentFlow",
+            totalModules: 12
+        },
+        {
+            title: "Backend Development",
+            category: "Tech",
+            instructor: "TalentFlow",
+            totalModules: 15
+        },
+        {
+            title: "UI/UX Design",
+            category: "Design",
+            instructor: "TalentFlow",
+            totalModules: 10
+        },
+        {
+            title: "Project Management",
+            category: "Management",
+            instructor: "TalentFlow",
+            totalModules: 8
+        },
+        {
+            title: "AI Integration",
+            category: "AI",
+            instructor: "TalentFlow",
+            totalModules: 14
+        },
+        {
+            title: "Machine Learning",
+            category: "AI",
+            instructor: "TalentFlow",
+            totalModules: 16
+        }
     ];
 
-    await Course.insertMany(courses); //insertMany is used to insert multiple documents into the collection at once
+    await Course.insertMany(courses);
 
     console.log("Courses seeded successfully");
 };

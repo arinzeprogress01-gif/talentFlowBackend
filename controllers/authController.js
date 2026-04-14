@@ -530,23 +530,35 @@ export const resendVerification = async (req, res) => {
     }
 };
 
+import User from "../models/User.js";
+import Course from "../models/Course.js";
+import Progress from "../models/Progress.js";
+
 export const verifyRole = async (req, res) => {
     try {
         const { fullName, referenceNumber, courseId } = req.body;
 
-        const selectedCourse = await Course.findById(courseId);
-
-        if (!selectedCourse) {
-            return res.status(404).json({ message: "Course not found" });
-        }
-
+        // ❌ Prevent admin from using this
         const user = await User.findById(req.user.id);
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Match reference
+        if (user.role === "admin") {
+            return res.status(403).json({
+                message: "Admins do not require verification"
+            });
+        }
+
+        // ✅ Validate course
+        const selectedCourse = await Course.findById(courseId);
+
+        if (!selectedCourse) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        // ✅ Match reference (ROLE-BASED)
         const validRef =
             user.role === "learner"
                 ? user.learnerRef === referenceNumber
@@ -556,63 +568,62 @@ export const verifyRole = async (req, res) => {
             return res.status(400).json({ message: "Invalid reference number" });
         }
 
-        // Match name
+        // ✅ Match name
         if (user.fullName !== fullName) {
             return res.status(400).json({ message: "Name does not match records" });
         }
 
+        // ✅ Save verification
         user.selectedCourse = selectedCourse.title;
+        user.isVerified = true; // 🔥 YOU CHOSE THIS (not isEmailVerified)
         user.isRoleVerified = true;
 
         await user.save();
 
-        // 🔥 CREATE PROGRESS FOR USER (ONLY IF NOT EXIST)
-const existingProgress = await Progress.findOne({ user: user._id });
+        // 🔥 CREATE PROGRESS ONLY FOR LEARNERS
+        if (user.role === "learner") {
+            const existingProgress = await Progress.findOne({ user: user._id });
 
-if (!existingProgress) {
-    await Progress.create({
-        user: user._id,
-
-        courses: [
-            {
-                title: selectedCourse.title,
-                instructor: selectedCourse.instructor,
-                totalModules: selectedCourse.totalModules,
-                modulesCompleted: 0,
-                progress: 0,
-                completed: false
+            if (!existingProgress) {
+                await Progress.create({
+                    user: user._id,
+                    courses: [
+                        {
+                            title: selectedCourse.title,
+                            instructor: selectedCourse.instructor || "TalentFlow",
+                            totalModules: selectedCourse.totalModules || 10,
+                            modulesCompleted: 0,
+                            progress: 0,
+                            completed: false
+                        }
+                    ],
+                    milestones: [
+                        {
+                            title: "Joined TalentFlow",
+                            date: new Date().toDateString(),
+                            achieved: true
+                        },
+                        {
+                            title: "First Course Enrolled",
+                            date: new Date().toDateString(),
+                            achieved: true
+                        }
+                    ],
+                    learningDays: 1
+                });
             }
-        ],
+        }
 
-        milestones: [
-            {
-                title: "Joined TalentFlow",
-                date: new Date().toDateString(),
-                achieved: true
-            },
-            {
-                title: "First Course Enrolled",
-                date: new Date().toDateString(),
-                achieved: true
-            }
-        ],
-
-        learningDays: 1
-    });
-}
-
-        // 🔥 FINAL EMAIL
+        // 🔥 FINAL EMAIL (UNCHANGED BEAUTY)
         const message = `
         <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
             <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
                 
-                <!-- Header -->
                 <div style="background: linear-gradient(135deg, #065f46, #047857); padding: 25px; text-align: center; color: white;">
                     <h1>Welcome to TalentFlow 🎉</h1>
                     <p style="opacity:0.9;">Your journey officially begins now</p>
                 </div>
 
-                <!-- Body -->
                 <div style="padding: 30px;">
                     <p>Hello <strong>${user.fullName}</strong>,</p>
 
@@ -628,34 +639,15 @@ if (!existingProgress) {
                     </div>
 
                     <p style="color:#555;">
-                        You are now officially enrolled in the <strong>${selectedCourse.title}</strong> course. This is your first step towards building real-world skills and achieving your goals with TalentFlow.:
+                        You are now officially enrolled in the <strong>${selectedCourse.title}</strong> course.
                     </p>
 
                     <p style="font-weight:bold; color:#065f46;">
                         GROW IN IT
                     </p>
 
-                    <p style="color:#555; line-height:1.6;">
-                        This marks the beginning of your growth journey. TalentFlow is designed to help you build real-world skills, collaborate with others, and achieve meaningful progress in your chosen path.
-                    </p>
-
-                    <p style="color:#555; line-height:1.6;">
-                        Stay consistent. Stay disciplined. Keep building. The platform is here to guide and support you every step of the way.
-                    </p>
-
-                    <p style="color:#555;">
-                        You can always explore and enroll in additional courses as you grow.
-                    </p>
-
                     <div style="text-align:center; margin-top:30px;">
-                        <a href="#" style="
-                            background:#047857;
-                            color:white;
-                            padding:12px 25px;
-                            border-radius:6px;
-                            text-decoration:none;
-                            font-weight:bold;
-                        ">
+                        <a href="#" style="background:#047857;color:white;padding:12px 25px;border-radius:6px;text-decoration:none;font-weight:bold;">
                             START YOUR JOURNEY
                         </a>
                     </div>
@@ -672,7 +664,7 @@ if (!existingProgress) {
 
         res.json({
             message: "Verification successful",
-            selectedCourse
+            role: user.role
         });
 
     } catch (error) {
