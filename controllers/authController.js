@@ -550,6 +550,12 @@ export const verifyRole = async (req, res) => {
             });
         }
 
+        if(user.isRoleVerified) {
+            return res.status(400).json({
+                message: "Role already verified, Redirecting to dashboard..."
+            });
+        }
+
         // ✅ Validate course
         const selectedCourse = await Course.findById(courseId);
 
