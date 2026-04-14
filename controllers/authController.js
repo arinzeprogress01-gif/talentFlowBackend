@@ -552,7 +552,7 @@ export const verifyRole = async (req, res) => {
 
         if(user.isRoleVerified) {
             return res.status(400).json({
-                message: "Role already verified, Redirecting to dashboard..."
+                message: "Role already verified, Double Verification is not Approved"
             });
         }
 
