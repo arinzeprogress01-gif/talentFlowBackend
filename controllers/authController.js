@@ -222,6 +222,7 @@ export const loginUser = async (req, res) => {
                 email: user.email,
                 tfId: user.tfId,
                 role: user.role,
+                isRoleVerified: user.isRoleVerified
             },
         });
 
