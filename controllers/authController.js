@@ -171,7 +171,7 @@ export const registerUser = async (req, res) => {
 
         // ✅ SINGLE RESPONSE ONLY
         res.status(201).json({
-            message: "User Account Registered Successfully",
+            message: "User Account Registered Successfully , Go To Email To Activate Account !",
             tfId: user.tfId,
             role: user.role,
             refId
