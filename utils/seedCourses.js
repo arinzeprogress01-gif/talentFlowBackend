@@ -1,6 +1,13 @@
 import Course from "../models/Course.js";
 
 export const seedCourses = async () => {
+    const existing = await Course.countDocuments();
+
+    if (existing > 0) {
+        console.log("Courses already exist");
+        return;
+    }
+
     const courses = [
         {
             title: "Frontend Development",
@@ -40,13 +47,9 @@ export const seedCourses = async () => {
         }
     ];
 
-    for (const course of courses) {
-        await Course.findOneAndUpdate(
-            { title: course.title }, // match existing
-            course,                  // new data
-            { upsert: true, new: true }
-        );
-    }
 
-    console.log("Courses Synced Successfully! 🔄");
+
+    await Course.insertMany(courses);
+
+    console.log("All Courses Seeded Successfully! 🎉");
 };
