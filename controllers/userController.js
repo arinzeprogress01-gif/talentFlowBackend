@@ -17,8 +17,12 @@ export const getUserProfile = async (req, res) => {
                 isEmailVerified: user.isVerified,
                 isRoleVerified: user.isRoleVerified,
                 selectedCourse: user.selectedCourse,
-                learnerRef: user.learnerRef,
-                tutorRef: user.tutorRef
+                referenceNumber: user.role === "learner"
+                    ? user.learnerRef
+                    : user.tutorRef,
+
+               // ✅ ADD THIS
+                joinedAt: user.createdAt
             }
         });
 
