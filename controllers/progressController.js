@@ -11,7 +11,7 @@ export const getProgress = async (req, res) => {
         const progress = await Progress.findOne({ user: userId });
 
         if (!progress) {
-            return res.status(404).json({ message: "No progress found" });
+            return res.status(404).json({ message: "No Progress Found" });
         }
 
         const totalCourses = progress.courses.length;
@@ -68,18 +68,18 @@ export const updateCourseProgress = async (req, res) => {
         const progress = await Progress.findOne({ user: req.user.id });
 
         if (!progress) {
-            return res.status(404).json({ message: "Progress not found" });
+            return res.status(404).json({ message: "Progress Not Found" });
         }
 
         const course = progress.courses.find(c => c.title === courseName);
 
         if (!course) {
-            return res.status(404).json({ message: "Course not found" });
+            return res.status(404).json({ message: "Course Not Found" });
         }
 
         // 🔥 Prevent overflow
         if (course.completed) {
-            return res.json({ message: "Course already completed", course });
+            return res.json({ message: "Course Already Completed", course });
         }
 
         // 🔥 Increase module
@@ -171,7 +171,7 @@ export const updateCourseProgress = async (req, res) => {
         await progress.save();
 
         res.json({
-            message: "Progress updated successfully",
+            message: "Progress Updated Successfully",
             course
         });
 
@@ -186,7 +186,7 @@ export const getUserProgress = async (req, res) => {
         const progress = await Progress.findOne({ user: req.user.id });
 
         if (!progress) {
-            return res.status(404).json({ message: "No progress found" });
+            return res.status(404).json({ message: "No Progress Found" });
         }
 
         res.json(progress);
@@ -204,13 +204,13 @@ export const enrollCourse = async (req, res) => {
         const course = await Course.findById(courseId);
 
         if (!course) {
-            return res.status(404).json({ message: "Course not found" });
+            return res.status(404).json({ message: "Course Not Found" });
         }
 
         let progress = await Progress.findOne({ user: user._id });
 
         if (!progress) {
-            return res.status(404).json({ message: "Progress not found" });
+            return res.status(404).json({ message: "Progress Not Found" });
         }
 
         // ❗ prevent duplicate
@@ -219,7 +219,7 @@ export const enrollCourse = async (req, res) => {
         );
 
         if (exists) {
-            return res.status(400).json({ message: "Already enrolled" });
+            return res.status(400).json({ message: "Already Enrolled!" });
         }
 
         // ✅ ADD NEW COURSE
@@ -241,7 +241,7 @@ export const enrollCourse = async (req, res) => {
 
         await progress.save();
 
-        res.json({ message: "Course enrolled successfully" });
+        res.json({ message: "Course Enrolled Successfully" });
 
     } catch (error) {
         res.status(500).json({ message: error.message });

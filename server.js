@@ -16,6 +16,6 @@ if (typeof process.env.PORT !== "undefined") {
 } else {
     const PORT = 8080;
     app.listen(PORT, () => {
-        console,log(`Server running on port ${PORT}`);
+        console.log(`Server running on port ${PORT}`);
     });
-}
+} // Default to port 8080 if PORT is not defined

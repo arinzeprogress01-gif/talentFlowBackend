@@ -13,7 +13,7 @@ export const registerUser = async (req, res) => {
         const { fullName, email, password, confirmPassword, role } = req.body;
 
         if (!fullName || !email || !password || !confirmPassword) {
-            return res.status(400).json({ message: "All fields are required" });
+            return res.status(400).json({ message: "All Fields are Required!" });
         }
 
         if (password !== confirmPassword) {
@@ -40,7 +40,7 @@ export const registerUser = async (req, res) => {
             .update(verificationToken)
             .digest("hex");
 
-        // ✅ HANDLE ROLE (THIS IS THE ONLY REAL ADDITION)
+        // HANDLE ROLE (THIS IS THE ONLY REAL ADDITION)
         let userRole = "learner"; // default
 
         if (role === "tutor" || role === "admin" || role === "learner") {
@@ -70,7 +70,7 @@ export const registerUser = async (req, res) => {
         });
 
 
-        //🔥 EMAIL (ROLE EMAil) and 🔥 VERIFY EMAIL
+        // EMAIL (ROLE EMAil) and  VERIFY EMAIL
         const verifyUrl = `${process.env.BASE_URL}/api/auth/verify-email/${verificationToken}`;
 
         const message1 = `
@@ -171,7 +171,7 @@ export const registerUser = async (req, res) => {
 
         // ✅ SINGLE RESPONSE ONLY
         res.status(201).json({
-            message: "User registered successfully",
+            message: "User Account Registered Successfully",
             tfId: user.tfId,
             role: user.role,
             refId
@@ -191,12 +191,12 @@ export const loginUser = async (req, res) => {
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(400).json({ message: "Invalid credentials" });
+            return res.status(400).json({ message: "Credentials Entered are Invalid" });
         }
 
         if (!user.isVerified) {
             return res.status(401).json({
-                message: "Please verify your email before logging in"
+                message: "Please Verify Your Account Via Email before Logging in"
             });
         }
 
@@ -204,7 +204,7 @@ export const loginUser = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(400).json({ message: "Invalid credentials" });
+            return res.status(400).json({ message: "Credentials Entered are Invalid" });
         }
 
         // Generate token
@@ -430,7 +430,7 @@ export const verifyEmail = async (req, res) => {
         });
 
         if (!user) {
-            return res.status(400).json({ message: "Invalid or expired token" });
+            return res.status(400).json({ message: "Invalid or Expired Token" });
         }
 
         user.isVerified = true; 
@@ -440,8 +440,80 @@ export const verifyEmail = async (req, res) => {
         await user.save();
 
         res.send(`
-            <h2>Email Verified Successfully ✅</h2>
-            <p>You can now return to login.</p>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Email Verified - TalentFlow</title>
+        </head>
+        <body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f6fb;">
+
+            <div style="max-width:600px; margin:50px auto; background:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 6px 25px rgba(0,0,0,0.08);">
+                
+                <!-- Header -->
+                <div style="background:linear-gradient(135deg, #065f46, #047857); padding:30px; text-align:center; color:white;">
+                    <h1 style="margin:0; font-size:26px;">TalentFlow</h1>
+                    <p style="margin:5px 0 0; opacity:0.9;">by TrueMinds Ltd</p>
+                </div>
+
+                <!-- Body -->
+                <div style="padding:40px 30px; text-align:center;">
+                    
+                    <h2 style="color:#065f46; margin-bottom:15px;">
+                        Email Verified Successfully ✅
+                    </h2>
+
+                    <p style="color:#555; line-height:1.6; font-size:15px;">
+                        Congratulations! Your email address has been successfully verified and your account is now fully activated.
+                    </p>
+
+                    <p style="color:#555; line-height:1.6; font-size:15px;">
+                        You can now securely log in to your TalentFlow account and continue your journey towards building real-world skills, tracking your progress, and achieving your goals.
+                    </p>
+
+                    <div style="margin:25px 0; padding:20px; background:#ecfdf5; border-left:5px solid #047857; text-align:left;">
+                        <p style="margin:0; color:#065f46; font-weight:bold;">
+                            What's next?
+                        </p>
+                        <ul style="margin:10px 0 0 15px; color:#555; line-height:1.6;">
+                            <li>Log in to your account</li>
+                            <li>Complete your profile setup</li>
+                            <li>Enroll in your selected course</li>
+                            <li>Start learning and track your progress</li>
+                        </ul>
+                    </div>
+
+                    <a href="#" style="
+                        display:inline-block;
+                        margin-top:20px;
+                        background:#047857;
+                        color:white;
+                        padding:12px 28px;
+                        border-radius:6px;
+                        text-decoration:none;
+                        font-weight:bold;
+                        font-size:14px;
+                    ">
+                        Go to Login
+                    </a>
+
+                    <p style="margin-top:30px; color:#777; font-size:13px;">
+                        If you did not perform this action, please contact our support team immediately.
+                    </p>
+
+                </div>
+
+                <!-- Footer -->
+                <div style="background:#f9fafb; padding:15px; text-align:center; font-size:12px; color:#888;">
+                    © ${new Date().getFullYear()} TrueMinds Ltd • TalentFlow <br/>
+                    Empowering Growth Through Technology
+                </div>
+
+            </div>
+
+        </body>
+        </html>
         `);
 
     } catch (error) {
@@ -474,7 +546,7 @@ export const resendVerification = async (req, res) => {
 
         await user.save();
 
-        const verifyUrl = `http://localhost:8080/verify-email/${verificationToken}`;
+        const verifyUrl = `${process.env.BASE_URL}/verify-email/${verificationToken}`;
 
         const message = `
         <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
@@ -524,7 +596,7 @@ export const resendVerification = async (req, res) => {
 
         await sendEmail(email, "Verify Your Email", message);
 
-        res.json({ message: "Verification email resent" });
+        res.json({ message: "New Verification email Resent" });
 
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -541,12 +613,12 @@ export const verifyRole = async (req, res) => {
         const user = await User.findById(req.user.id);
 
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+            return res.status(404).json({ message: "User Account Not Found" });
+        };
 
         if (user.role === "admin") {
             return res.status(403).json({
-                message: "Admins do not require verification"
+                message: "Admins Do Not Require Role Verification"
             });
         }
 
@@ -560,7 +632,7 @@ export const verifyRole = async (req, res) => {
         const selectedCourse = await Course.findById(courseId);
 
         if (!selectedCourse) {
-            return res.status(404).json({ message: "Course not found" });
+            return res.status(404).json({ message: "Course Not Avaliable" });
         }
 
         // ✅ Match reference (ROLE-BASED)
@@ -570,12 +642,12 @@ export const verifyRole = async (req, res) => {
                 : user.tutorRef === referenceNumber;
 
         if (!validRef) {
-            return res.status(400).json({ message: "Invalid reference number" });
+            return res.status(400).json({ message: "Invalid Reference Number" });
         }
 
         // ✅ Match name
         if (user.fullName !== fullName) {
-            return res.status(400).json({ message: "Name does not match records" });
+            return res.status(400).json({ message: "Name Entered Does Not Match Our Records" });
         }
 
         // ✅ Save verification
@@ -619,7 +691,7 @@ export const verifyRole = async (req, res) => {
             }
         }
 
-        // 🔥 FINAL EMAIL (UNCHANGED BEAUTY)
+        // FINAL EMAIL
         const message = `
         <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
             <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
@@ -668,7 +740,7 @@ export const verifyRole = async (req, res) => {
         await sendEmail(user.email, "Welcome to TalentFlow", message);
 
         res.json({
-            message: "Verification successful",
+            message: "Verification Successful!",
             role: user.role
         });
 
@@ -685,7 +757,7 @@ export const logoutUser = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: "Logged out successfully"
+            message: "Logged out successfully!"
         });
 
     } catch (err) {

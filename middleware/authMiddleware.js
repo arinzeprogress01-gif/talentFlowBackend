@@ -13,12 +13,12 @@ export const protect = (req, res, next) => {
 
             next();
         } catch (error) {
-            return res.status(401).json({ message: "Not authorized" });
+            return res.status(401).json({ message: "Not Authorized!" });
         }
     }
 
     if (!token) {
-        return res.status(401).json({ message: "No token provided" });
+        return res.status(401).json({ message: "No Token Provided" });
     }
 };
 

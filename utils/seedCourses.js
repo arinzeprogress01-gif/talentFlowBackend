@@ -12,42 +12,42 @@ export const seedCourses = async () => {
         {
             title: "Frontend Development",
             category: "Tech",
-            instructor: "TalentFlow",
+            instructor: "Mr Oyinlade [Frontend Dev]",
             totalModules: 12
         },
         {
             title: "Backend Development",
             category: "Tech",
-            instructor: "TalentFlow",
+            instructor: "Mr Alpha [Backend Dev]",
             totalModules: 15
         },
         {
             title: "UI/UX Design",
             category: "Design",
-            instructor: "TalentFlow",
+            instructor: "Mr Damilare [UI/UX Designer]",
             totalModules: 10
         },
         {
             title: "Project Management",
             category: "Management",
-            instructor: "TalentFlow",
+            instructor: "Mrs Chika [Project Manager]",
             totalModules: 8
         },
         {
             title: "AI Integration",
             category: "AI",
-            instructor: "TalentFlow",
+            instructor: "Mr Charles Page [AI Specialist]",
             totalModules: 14
         },
         {
             title: "Machine Learning",
             category: "AI",
-            instructor: "TalentFlow",
+            instructor: "Dr. Sarah Johnson [ML Engineer]",
             totalModules: 16
         }
     ];
 
     await Course.insertMany(courses);
 
-    console.log("Courses seeded successfully");
+    console.log("All Courses Seeded Successfully! 🎉");
 };

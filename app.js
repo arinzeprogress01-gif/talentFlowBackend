@@ -12,7 +12,7 @@ const app = express();
 app.use(cors({
     origin: "https://talent-flow-frontend-project.vercel.app",
     credentials: true
-}));
+})); // Allow credentials for cookies, etc.
 
 app.use(express.json());
 
