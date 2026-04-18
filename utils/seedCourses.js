@@ -55,5 +55,5 @@ export const seedCourses = async () => {
 
     await Course.insertMany(courses);
 
-    console.log("All Courses Seeded Successfully! 🎉");
+    console.log("All Courses Seeded Successfully And Database Updated! 🎉");
 };
