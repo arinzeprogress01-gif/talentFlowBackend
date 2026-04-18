@@ -16,7 +16,8 @@ const courseSchema = new mongoose.Schema({
     totalModules: {
         type: Number,
         default: 10
-    }
+    },
+    image: String
 
 }, { timestamps: true });
 
