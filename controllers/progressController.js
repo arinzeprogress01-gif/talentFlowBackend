@@ -25,7 +25,7 @@ export const getProgress = async (req, res) => {
                 ? progress.courses.reduce((acc, c) => acc + c.progress, 0) / totalCourses
                 : 0;
 
-        // 🔥 ENCOURAGEMENT SYSTEM
+        //  ENCOURAGEMENT SYSTEM
         const getEncouragement = (percent) => {
             if (percent < 25) return "You're just getting started — stay consistent 💪";
             if (percent < 50) return "Good progress so far — keep pushing 🚀";
@@ -34,7 +34,7 @@ export const getProgress = async (req, res) => {
             return "Excellent work — course completed 🎉";
         };
 
-        // 🔥 SORT MILESTONES (latest first)
+        //  SORT MILESTONES (latest first)
         const sortedMilestones = progress.milestones.sort(
             (a, b) => new Date(b.date) - new Date(a.date)
         );
@@ -77,31 +77,31 @@ export const updateCourseProgress = async (req, res) => {
             return res.status(404).json({ message: "Course Not Found" });
         }
 
-        // 🔥 Prevent overflow
+        //  Prevent overflow
         if (course.completed) {
             return res.json({ message: "Course Already Completed", course });
         }
 
-        // 🔥 Increase module
+        //  Increase module
         course.modulesCompleted += 1;
 
-        // 🔥 Cap modules
+        //  Cap modules
         if (course.modulesCompleted > course.totalModules) {
             course.modulesCompleted = course.totalModules;
         }
 
-        // 🔥 Calculate %
+        //  Calculate %
         course.progress = Math.round(
             (course.modulesCompleted / course.totalModules) * 100
         );
 
-        // 🔥 Prevent >100
+        //  Prevent >100
         if (course.progress > 100) course.progress = 100;
 
-        // 🔥 GET MESSAGE
+        //  GET MESSAGE
         const message = getProgressMessage(course.progress);
 
-        // 🔥 PREVENT DUPLICATE MESSAGE
+        //  PREVENT DUPLICATE MESSAGE
         const alreadyExists = progress.milestones.find(
             m => m.title === message && m.course === courseName
         );
@@ -115,7 +115,7 @@ export const updateCourseProgress = async (req, res) => {
             });
         }
 
-        // 🔥 ASSIGNMENTS (ONLY ONCE)
+        //  ASSIGNMENTS (ONLY ONCE)
         const triggerMilestone = (title) => {
             const exists = progress.milestones.find(
                 m => m.title === title && m.course === courseName
@@ -147,14 +147,14 @@ export const updateCourseProgress = async (req, res) => {
             triggerMilestone("Final exam unlocked");
         }
 
-        // 🔥 COURSE COMPLETION
+        //  COURSE COMPLETION
         if (course.progress === 100 && !course.completed) {
             course.completed = true;
 
             triggerMilestone(`${courseName} Completed`);
         }
 
-        // 🔥 LEARNING STREAK
+        //  LEARNING STREAK
         const today = new Date();
         const last = progress.lastActive || today;
 
@@ -222,7 +222,7 @@ export const enrollCourse = async (req, res) => {
             return res.status(400).json({ message: "Already Enrolled!" });
         }
 
-        // ✅ ADD NEW COURSE
+        // ADD NEW COURSE
         progress.courses.push({
             title: course.title,
             instructor: "TalentFlow Team",
@@ -232,7 +232,7 @@ export const enrollCourse = async (req, res) => {
             completed: false
         });
 
-        // ✅ DYNAMIC MILESTONE
+        //  DYNAMIC MILESTONE
         progress.milestones.push({
             title: `Enrolled in another course: ${course.title}`,
             date: new Date().toLocaleDateString(),

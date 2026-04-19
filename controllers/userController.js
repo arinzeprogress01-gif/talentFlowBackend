@@ -21,7 +21,7 @@ export const getUserProfile = async (req, res) => {
                     ? user.learnerRef
                     : user.tutorRef,
 
-               // ✅ ADD THIS
+               //  ADD THIS
                 joinedAt: user.createdAt
             }
         });

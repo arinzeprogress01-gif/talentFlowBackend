@@ -94,7 +94,7 @@ export const registerUser = async (req, res) => {
                         Your journey toward mastering new skills and creating real impact starts here.
                     </p>
 
-                    <!-- ✅ TF ID + REF ID COMBINED BOX -->
+                    <!--  TF ID + REF ID COMBINED BOX -->
                     <div style="margin: 25px 0; padding: 20px; background: #ecfdf5; border-left: 5px solid #047857; border-radius: 8px;">
                         <p style="margin: 0; font-size: 14px; color: #555;">Your TalentFlow ID</p>
                         <h2 style="margin: 5px 0 10px; color: #065f46; letter-spacing: 1px;">
@@ -121,7 +121,7 @@ export const registerUser = async (req, res) => {
                         Stay consistent, stay curious, and keep building. TalentFlow is here to support your growth every step of the way.
                     </p>
 
-                    <!-- ✅ EMAIL VERIFICATION -->
+                    <!--  EMAIL VERIFICATION -->
                     <div style="text-align: center; margin-top: 30px;">
                         <p style="font-size: 15px; color: #555;">
                             Please verify your email to activate your account.
@@ -169,7 +169,7 @@ export const registerUser = async (req, res) => {
             console.error("Verification Email Failed:", err.message);
         }
 
-        // ✅ SINGLE RESPONSE ONLY
+        //  SINGLE RESPONSE ONLY
         res.status(201).json({
             message: "User Account Registered Successfully , Go To Email To Activate Account !",
             tfId: user.tfId,
@@ -303,25 +303,25 @@ export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
 
-        // 1️⃣ Find user
+        // 1. Find user
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // 2️⃣ Generate reset token
+        // 2. Generate reset token
         const resetToken = crypto.randomBytes(32).toString("hex");
         const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
-        // 3️⃣ Save hashed token and expiry to user
+        // 3. Save hashed token and expiry to user
         user.resetPasswordToken = hashedToken;
         user.resetPasswordExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
         await user.save();
 
-        // 4️⃣ Build reset URL (use client URL from env)
+        // 4. Build reset URL (use client URL from env)
         const resetUrl = `${process.env.BASE_URL}/api/auth/forgot-password/${resetToken}`;
 
-        // 5️⃣ Create beautiful emerald green email
+        // 5. Create beautiful emerald green email
         const message = `
         <div style="font-family: Arial, sans-serif; background-color: #f4f6fb; padding: 20px;">
             <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
@@ -368,7 +368,7 @@ export const forgotPassword = async (req, res) => {
         </div>
         `;
 
-        // 6️⃣ Send email
+        // 6. Send email
         await sendEmail(email, "TalentFlow Password Reset", message);
 
         res.json({ message: "Reset email sent" });
@@ -386,10 +386,10 @@ export const resetPassword = async (req, res) => {
         const { token } = req.params;
         const { password } = req.body;
 
-        // 1️⃣ Hash the token to match DB
+        // 1. Hash the token to match DB
         const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
-        // 2️⃣ Find user with valid token
+        // 2. Find user with valid token
         const user = await User.findOne({
             resetPasswordToken: hashedToken,
             resetPasswordExpire: { $gt: Date.now() },
@@ -400,7 +400,7 @@ export const resetPassword = async (req, res) => {
             return res.status(400).json({ message: "Invalid or expired token" });
         }
 
-        // 3️⃣ Hash new password and save
+        // 3. Hash new password and save
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
 
@@ -609,7 +609,7 @@ export const verifyRole = async (req, res) => {
     try {
         const { fullName, referenceNumber, courseId } = req.body;
 
-        // ❌ Prevent admin from using this
+        //  Prevent admin from using this
         const user = await User.findById(req.user.id);
 
         if (!user) {
@@ -628,14 +628,14 @@ export const verifyRole = async (req, res) => {
             });
         }
 
-        // ✅ Validate course
+        //  Validate course
         const selectedCourse = await Course.findById(courseId);
 
         if (!selectedCourse) {
             return res.status(404).json({ message: "Course Not Avaliable" });
         }
 
-        // ✅ Match reference (ROLE-BASED)
+        //  Match reference (ROLE-BASED)
         const validRef =
             user.role === "learner"
                 ? user.learnerRef === referenceNumber
@@ -645,19 +645,19 @@ export const verifyRole = async (req, res) => {
             return res.status(400).json({ message: "Invalid Reference Number" });
         }
 
-        // ✅ Match name
+        //  Match name
         if (user.fullName !== fullName) {
             return res.status(400).json({ message: "Name Entered Does Not Match Our Records" });
         }
 
-        // ✅ Save verification
+        //  Save verification
         user.selectedCourse = selectedCourse.title;
         user.isVerified = true; // 🔥 YOU CHOSE THIS (not isEmailVerified)
         user.isRoleVerified = true;
 
         await user.save();
 
-        // 🔥 CREATE PROGRESS ONLY FOR LEARNERS
+        //  CREATE PROGRESS ONLY FOR LEARNERS
         if (user.role === "learner") {
             const existingProgress = await Progress.findOne({ user: user._id });
 

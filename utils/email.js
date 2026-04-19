@@ -27,7 +27,9 @@ const sendEmail = async (to, subject, html) => {
 
 export default sendEmail;
 
-/*import { Resend } from "resend";
+/* RESEND AND BREVO ALLOCATIONS MADE FOR FUTURE UPGRADE
+
+import { Resend } from "resend";
 
 const resend = new Resend('re_At9TUuwd_EQML41Eji6N3P5Mh3m9FLXjZ');
 

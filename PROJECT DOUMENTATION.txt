@@ -1,0 +1,112 @@
+TalentFlow Backend Documentation:
+NOTE : Mailtrap Login-Details>> Email: arinzeprogrss0@gmail.completed
+                                Password: Nampedia@11111
+
+ Introduction:
+
+TalentFlow is a backend-driven learning management system designed to handle user authentication,
+course enrollment, and intelligent progress tracking. It simulates a real-world e-learning platform with
+structured learning and secure verification.
+
+A. System Architecture
+
+1 app.js – express and routes entry point
+2 server.js - server entry point
+3 controllers – business logic
+4 models – database schemas
+5 routes – API endpoints
+6 middleware – authentication protection
+7 utils – system utilities (TFID, LRN/TRN, seed courses, email services)
+
+B. Utilities and Core Identifiers
+
+The system includes advanced utilities that power real-world functionality:
+1 TFID – TalentFlow unique user identifier
+2 LRN – Learner Reference Number
+3 TRN – Transaction/Reference Number
+4 Seed Courses – preloaded courses inserted into the database,coupled with images for course cards
+
+C. Email System (Mailtrap & Brevo)
+Emails are sent using Mailtrap for testing and Brevo for production readiness.
+Brevo is currently in-active due to limitations.
+
+Mailtrap Sign-up details above [ emails will be received in the sandbox]
+This makes allocation for:
+
+1. Account verification emails
+2 TFID, LRN, TRN delivery
+3 Verification links for account activation
+
+D. Authentication Flow
+1 User registers
+2 TFID, LRN, TRN generated
+3 Verification email sent
+4 User verifies account
+5 User logs in with JWT authentication
+6 Verifies Role and picks a course 
+
+Note: Registration and Role Verifications can only be done once
+
+E. Course Enrollment
+
+Endpoint: POST /api/courses/enroll
+1 Prevents duplicate enrollment
+2 Adds course to user progress system
+
+F. Progress Tracking System
+1 Tracks modules completed
+2 Calculates percentage progress
+3 Triggers milestones at 25%, 50%, 75%, 100%
+4 Marks course as completed at 100%
+8. Learning Streak
+Tracks daily engagement and maintains a streak based on user activity.
+
+
+System Flow Diagram
+
+Register → Validate Input → Hash Password → Generate TFID/LRN/TRN → Send Email → Verify
+Email → Login → Generate JWT → Access Protected Routes → Enroll Course → Initialize Progress →
+Access Modules → Update Progress → Complete Course
+
+
+///API Endpoints Overview///
+
+Method      Endpoint                 Description             Auth-Required
+POST      /api/auth/register         Register new user       No
+GET       /api/auth/verify/:token    Verify email            No
+POST      /api/auth/login            Login user & get JWT    No
+GET       /api/user/me               Get current user        Yes
+GET       /api/courses               Fetch all courses       No
+POST      /api/courses/enroll        Enroll in course        Yes
+GET       /api/progress              Get user progress       Yes
+PUT       /api/progress/update       Update course progress  Yes
+
+
+Authentication Flow (Detailed)
+Registration enforces strict validation rules including field presence, password confirmation, regex
+validation, and uniqueness checks in MongoDB.
+
+1 Password hashed using bcrypt with salt rounds
+2 JWT generated on login with expiration
+3 Email verification required before access
+4 Duplicate registration and verification prevented
+
+
+//Progress Engine Logic//
+User clicks module → Frontend triggers API → Backend increments modulesCompleted →
+Recalculates progress percentage → Triggers milestone if threshold reached → Saves to MongoDB
+
+
+//Edge Case Handling//
+1 Duplicate email prevention (unique index)
+2 Duplicate enrollment blocked
+3 Progress cannot exceed 100%
+4 Milestones cannot duplicate
+5 JWT must be valid for protected routes
+Future Improvements
+1 Forgot Password & Reset Password endpoints
+2 Resend verification email
+3 Full module/lesson backend system
+4 Certificate generation system
+5 Role-based dashboards (Admin/Tutor)
+
